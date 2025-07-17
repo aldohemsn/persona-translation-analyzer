@@ -3,48 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Persona Translation Analyzer (v8)</title>
+    <title>Interactive Persona Translation Analyzer (v10)</title>
+    <!-- Local CSS and Font files for offline use -->
     <link href="fonts.css" rel="stylesheet">
     <link href="styles.css" rel="stylesheet">
     <style>
         /* General Styling */
-        body { 
-            -webkit-font-smoothing: antialiased; 
-            -moz-osx-font-smoothing: grayscale; 
-            font-family: 'Inter', sans-serif; 
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body.modal-open { overflow: hidden; }
 
         /* Tooltip */
-        #global-tooltip { 
-            position: fixed; 
-            visibility: hidden; 
-            opacity: 0; 
-            transition: opacity 0.2s ease-in-out; 
-            z-index: 1000; 
-            max-width: 24rem; 
-            pointer-events: none; 
+        #global-tooltip {
+            position: fixed;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+            z-index: 1000;
+            max-width: 24rem;
+            pointer-events: none;
         }
 
         /* Diagnostic Ribbons */
-        .ribbon { 
-            position: relative; 
-            cursor: pointer; 
-            padding: 1px 4px; 
-            border-radius: 4px; 
-            font-weight: 500; 
-            transition: all 0.2s ease-in-out; 
+        .ribbon {
+            position: relative;
+            cursor: pointer;
+            padding: 1px 4px;
+            border-radius: 4px;
+            font-weight: 500;
+            transition: all 0.2s ease-in-out;
         }
         .ribbon-analyst { background-color: rgba(59, 130, 246, 0.2); color: #1d4ed8; border-bottom: 2px dotted #3b82f6; }
         .ribbon-architect { background-color: rgba(249, 115, 22, 0.2); color: #b45309; border-bottom: 2px dashed #f97316; }
         .ribbon-stylist { background-color: rgba(34, 197, 94, 0.2); color: #15803d; border-bottom: 2px dotted #22c55e; }
         .ribbon:hover { filter: brightness(1.1); }
-        .errors-hidden .ribbon { 
-            background-color: transparent !important; 
-            color: inherit !important; 
-            border-bottom-color: transparent !important; 
-            font-weight: normal; 
-            cursor: default; 
+        .errors-hidden .ribbon {
+            background-color: transparent !important;
+            color: inherit !important;
+            border-bottom-color: transparent !important;
+            font-weight: normal;
+            cursor: default;
         }
         
         /* Revision Visibility Toggle */
@@ -59,18 +61,18 @@
         }
 
         /* Main Table Grid Layout */
-        .table-grid { 
-            display: grid; 
-            grid-template-columns: repeat(3, 1fr); 
-            gap: 1px; 
-            background-color: #e5e7eb; 
+        .table-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background-color: #e5e7eb;
         }
-        .table-cell { 
-            background-color: white; 
-            padding: 1rem; 
-            line-height: 1.75; 
-            word-break: break-word; 
-            white-space: pre-wrap; 
+        .table-cell {
+            background-color: white;
+            padding: 1rem;
+            line-height: 1.75;
+            word-break: break-word;
+            white-space: pre-wrap;
             transition: background-color 0.3s, color 0.3s;
             position: relative;
         }
@@ -151,10 +153,11 @@
         }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans leading-relaxed">
+<body class="bg-gray-50 text-gray-800 leading-relaxed">
 
     <div id="app" class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-        <header class="bg-white/80 backdrop-blur-md p-4 rounded-xl shadow-lg sticky top-4 z-20 border border-gray-200">
+        <!-- The header is now fully opaque with bg-white instead of bg-white/80 -->
+        <header class="bg-white p-4 rounded-xl shadow-lg sticky top-4 z-20 border border-gray-200">
             <div class="flex flex-wrap justify-between items-center gap-4 mb-4">
                 <h1 class="text-xl md:text-2xl font-bold text-gray-900">Persona Translation Analyzer</h1>
                 <div class="flex items-center space-x-2 sm:space-x-4">
