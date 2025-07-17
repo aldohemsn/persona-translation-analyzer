@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>本地翻译诊断JSON生成器 (v3)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; font-family: 'Inter', sans-serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+        .log-entry { border-left: 3px solid; }
+        .log-info { border-color: #3b82f6; } /* blue-500 */
+        .log-success { border-color: #22c55e; } /* green-500 */
+        .log-warn { border-color: #f97316; } /* orange-500 */
+        .log-error { border-color: #ef4444; } /* red-500 */
+        .spinner { border-top-color: #3b82f6; }
+        .drop-zone.drag-over { border-color: #3b82f6; background-color: #eff6ff; }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans">
+
+    <div id="app" class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+        <div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
+            <header class="mb-6 text-center">
+                <h1 class="text-3xl font-bold text-gray-900">本地翻译诊断JSON生成器 (v3)</h1>
+                <p class="mt-2 text-gray-600">通过“侦探-设计师-化妆师”框架，利用AI分析翻译案卷并生成包含 `target_phrase` 的标准化JSON文件。</p>
+            </header>
+
+            <div class="space-y-6">
+                <!-- Step 1: Configuration -->
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">1. 配置</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="apiKey" class="block text-sm font-medium text-gray-700">Gemini API 密钥</label>
+                            <input type="password" id="apiKey" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="在此处粘贴您的密钥">
+                            <p class="mt-1 text-xs text-gray-500">密钥保存在会话中，关闭标签页后清除。</p>
+                        </div>
+                        <div>
+                            <label for="modelName" class="block text-sm font-medium text-gray-700">模型名称</label>
+                            <input type="text" id="modelName" value="gemini-1.5-pro-latest" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Input -->
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">2. 输入</h2>
+                    <div>
+                        <label for="context" class="block text-sm font-medium text-gray-700">上下文 (可选)</label>
+                        <textarea id="context" rows="2" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="例如：The source text is a report written by Rand and commissioned by DOD."></textarea>
+                    </div>
+                    <div class="mt-4">
+                        <label for="fileUpload" class="block text-sm font-medium text-gray-700">案卷文件 (.txt)</label>
+                        <div id="dropZone" class="drop-zone mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer transition-colors">
+                            <div class="space-y-1 text-center">
+                                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                                <div class="flex text-sm text-gray-600">
+                                    <label for="fileUploadInput" class="relative bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+                                        <span>上传文件</span>
+                                        <input id="fileUploadInput" name="file-upload" type="file" class="sr-only" accept=".txt">
+                                    </label>
+                                    <p class="pl-1">或拖拽到此处</p>
+                                </div>
+                                <p id="fileName" class="text-xs text-gray-500">请上传包含翻译三联体的 .txt 文件</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Execution -->
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">3. 执行</h2>
+                    <button id="startButton" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                        开始分析
+                    </button>
+                </div>
+
+                <!-- Step 4: Log -->
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">4. 状态日志</h2>
+                    <div id="log" class="w-full h-48 bg-gray-900 text-white font-mono text-sm p-4 rounded-md overflow-y-auto">
+                        <p class="text-gray-400">等待开始...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Element Selectors ---
+            const apiKeyInput = document.getElementById('apiKey');
+            const modelNameInput = document.getElementById('modelName');
+            const contextInput = document.getElementById('context');
+            const fileUploadInput = document.getElementById('fileUploadInput');
+            const fileNameDisplay = document.getElementById('fileName');
+            const startButton = document.getElementById('startButton');
+            const logContainer = document.getElementById('log');
+            const dropZone = document.getElementById('dropZone');
+
+            let uploadedFile = null;
+
+            // --- Event Listeners ---
+            fileUploadInput.addEventListener('change', (event) => handleFileSelect(event.target.files));
+            startButton.addEventListener('click', runAnalysis);
+            
+            // API Key Caching in sessionStorage
+            apiKeyInput.addEventListener('input', (e) => sessionStorage.setItem('geminiApiKey', e.target.value));
+            apiKeyInput.value = sessionStorage.getItem('geminiApiKey') || '';
+
+            // Drag and Drop Listeners
+            dropZone.addEventListener('click', () => fileUploadInput.click());
+            dropZone.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); dropZone.classList.add('drag-over'); });
+            dropZone.addEventListener('dragleave', (e) => { e.preventDefault(); e.stopPropagation(); dropZone.classList.remove('drag-over'); });
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.classList.remove('drag-over');
+                handleFileSelect(e.dataTransfer.files);
+            });
+
+            function handleFileSelect(files) {
+                if (files.length > 0) {
+                    uploadedFile = files[0];
+                    fileNameDisplay.textContent = uploadedFile.name;
+                    fileNameDisplay.classList.remove('text-gray-500');
+                    fileNameDisplay.classList.add('text-green-600', 'font-semibold');
+                }
+            }
+
+            function log(message, type = 'info') {
+                const typeClasses = {
+                    info: 'log-info text-blue-300',
+                    success: 'log-success text-green-300',
+                    warn: 'log-warn text-orange-300',
+                    error: 'log-error text-red-300'
+                };
+                const entry = document.createElement('p');
+                entry.className = `log-entry pl-2 my-1 ${typeClasses[type]}`;
+                entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+                if (logContainer.firstChild?.textContent === '等待开始...') {
+                    logContainer.innerHTML = '';
+                }
+                logContainer.appendChild(entry);
+                logContainer.scrollTop = logContainer.scrollHeight;
+            }
+
+            async function runAnalysis() {
+                const apiKey = apiKeyInput.value;
+                const modelName = modelNameInput.value;
+                const context = contextInput.value;
+
+                if (!apiKey) {
+                    log('错误：API密钥不能为空。', 'error');
+                    return;
+                }
+                if (!uploadedFile) {
+                    log('错误：请先上传一个案卷文件。', 'error');
+                    return;
+                }
+
+                startButton.disabled = true;
+                startButton.innerHTML = `
+                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    正在处理...
+                `;
+                logContainer.innerHTML = ''; // Clear log
+
+                try {
+                    log('开始处理流程...');
+                    log(`使用的模型: ${modelName}`);
+
+                    const fileContent = await uploadedFile.text();
+                    const allCases = parseFileContent(fileContent);
+                    if (allCases.length === 0) {
+                        throw new Error('文件中未找到任何有效案例。');
+                    }
+                    log(`文件解析完成，共找到 ${allCases.length} 个有效案例。`, 'success');
+
+                    const BATCH_SIZE = 5;
+                    log(`将以每批最多 ${BATCH_SIZE} 个案例进行处理。`);
+
+                    const finalCasesData = { cases: [] };
+                    for (let i = 0; i < allCases.length; i += BATCH_SIZE) {
+                        const batch = allCases.slice(i, i + BATCH_SIZE);
+                        const startNum = i + 1;
+                        const endNum = Math.min(i + BATCH_SIZE, allCases.length);
+                        log(`正在分析批次 ${startNum}-${endNum}...`);
+
+                        const batchDiagnostics = await analyzeBatchRecursive(batch, context, modelName, apiKey);
+                        
+                        if (batchDiagnostics) {
+                            for (const caseData of batch) {
+                                const diagnostics = batchDiagnostics[caseData.id] || [];
+                                caseData.diagnostics = diagnostics;
+                                finalCasesData.cases.push(caseData);
+                            }
+                            log(`批次 ${startNum}-${endNum} 分析完成。`, 'success');
+                        } else {
+                            log(`批次 ${startNum}-${endNum} 分析失败，已跳过。`, 'error');
+                        }
+                        if (i + BATCH_SIZE < allCases.length) {
+                           await new Promise(resolve => setTimeout(resolve, 1000)); // Rate limiting
+                        }
+                    }
+
+                    log('所有批次处理完毕！正在生成JSON文件...', 'success');
+                    downloadJson(finalCasesData, 'cases.json');
+
+                } catch (error) {
+                    log(`处理过程中发生严重错误: ${error.message}`, 'error');
+                } finally {
+                    startButton.disabled = false;
+                    startButton.textContent = '开始分析';
+                }
+            }
+            
+            function parseFileContent(content) {
+                const cases = [];
+                const blocks = content.trim().split(/\n\s*\n/);
+                blocks.forEach(block => {
+                    const lines = block.trim().split('\n').filter(line => line.trim());
+                    if (lines.length === 3) {
+                        cases.push({
+                            id: `case-${crypto.randomUUID()}`,
+                            sourceText: lines[0].trim(),
+                            translationText: lines[1].trim(),
+                            revisionText: lines[2].trim()
+                        });
+                    } else if (lines.length > 0) {
+                        log(`警告：跳过格式不正确的文本块（应为三行）。`, 'warn');
+                    }
+                });
+                return cases;
+            }
+
+            async function analyzeBatchRecursive(batch, context, modelName, apiKey) {
+                if (!batch.length) return {};
+
+                const system_prompt = `
+你是一名专业的翻译分析工具。你的任务是分析一批由“原文”、“待分析译文”和“审校稿”组成的翻译案卷。
+请严格遵循“三人格”框架（侦探、设计师、化妆师）来诊断每个案卷中“待分析译文”的问题。
+
+三人格框架定义如下：
+1.  **侦探 (The Detective)**: 负责勘查原文，确保完全、精准地理解其事实、意图和潜台词。失职表现为【知识匮乏】。
+2.  **设计师 (The Designer)**: 负责解构原文，在目标语中设计出自然、地道的句法结构，摆脱原文束缚。失职表现为【流程失败】。
+3.  **化妆师 (The Make-up Artist)**: 负责终稿的润色，选择精准、优雅的词汇，确保语域得体、无低级错误。失职分为两种：【资源匮乏】（词汇量不足）或【流程失败】（不够勤勉）。
+
+你的分析必须以一个单一JSON对象的形式返回，不包含任何JSON格式之外的解释性文字。
+- 这个JSON对象的**键**是每个案卷的\`case_id\`。
+- **值**是一个JSON数组，其中每个元素代表一个在该案卷中发现的错误。
+- 每个错误对象必须包含以下字段:
+    - **original_phrase**: 原文中与错误相关的短语或句子。
+    - **target_phrase**: **【关键】** 待分析译文中与 original_phrase 对应且包含错误的具体文本。如果错误是句子层面的，此字段应为待分析译文的全文。
+    - **persona**: 导致错误的责任人格（"侦探"、"设计师"或"化妆师"）。
+    - **cause**: 错误的具体原因（"知识匮乏"、"流程失败"或"资源匮乏"）。
+    - **explanation**: 对错误的详细解释。
+
+请确保JSON格式绝对正确，以便程序解析。`;
+
+                let userPromptParts = ["请分析以下这批翻译案卷："];
+                if (context) userPromptParts.push(`\n**附加上下文信息:**\n${context}`);
+                batch.forEach(caseData => {
+                    userPromptParts.push(`\n${'-'.repeat(30)}`);
+                    userPromptParts.push(`CASE_ID_START:${caseData.id}\n`);
+                    userPromptParts.push(`**原文:**\n${caseData.sourceText}`);
+                    userPromptParts.push(`**待分析译文:**\n${caseData.translationText}`);
+                    userPromptParts.push(`**审校稿:**\n${caseData.revisionText}`);
+                    userPromptParts.push(`\nCASE_ID_END:${caseData.id}`);
+                });
+                userPromptParts.push(`\n${'-'.repeat(30)}`);
+                userPromptParts.push("\n请严格按照指示，返回一个以case_id为键的单一JSON对象。");
+                
+                const user_prompt = userPromptParts.join('\n');
+
+                const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+
+                try {
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: system_prompt }, { text: user_prompt }] }],
+                            generationConfig: { response_mime_type: "application/json" }
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const errorBody = await response.text();
+                        throw new Error(`API请求失败，状态码: ${response.status}. 响应: ${errorBody}`);
+                    }
+
+                    const data = await response.json();
+                    const responseText = data.candidates[0].content.parts[0].text;
+                    const cleanedText = responseText.replace(/```json\s*|\s*```/g, '').trim();
+                    return JSON.parse(cleanedText);
+
+                } catch (error) {
+                    if (batch.length === 1) {
+                        log(`错误: 即使在批次大小为1时，案例 ${batch[0].id} 的分析依然失败。错误: ${error.message}`, 'error');
+                        return { [batch[0].id]: [] }; // Return empty diagnostic for the failed case
+                    }
+
+                    log(`警告: 批次大小为 ${batch.length} 时分析失败。正在尝试将批次一分为二...`, 'warn');
+                    await new Promise(resolve => setTimeout(resolve, 2000)); // Wait before retrying
+                    
+                    const mid = Math.ceil(batch.length / 2);
+                    const firstHalfResults = await analyzeBatchRecursive(batch.slice(0, mid), context, modelName, apiKey);
+                    const secondHalfResults = await analyzeBatchRecursive(batch.slice(mid), context, modelName, apiKey);
+                    
+                    return { ...firstHalfResults, ...secondHalfResults };
+                }
+            }
+
+            function downloadJson(data, filename) {
+                const jsonStr = JSON.stringify(data, null, 4);
+                const blob = new Blob([jsonStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                log(`成功生成并下载文件: ${filename}`, 'success');
+            }
+        });
+    </script>
+</body>
+</html>
+
