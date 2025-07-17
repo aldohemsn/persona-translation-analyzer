@@ -3,39 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Persona Translation Analyzer (v7) </title>
+    <title>Interactive Persona Translation Analyzer (v8)</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; font-family: 'Inter', sans-serif; }
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+        /* General Styling */
+        body { 
+            -webkit-font-smoothing: antialiased; 
+            -moz-osx-font-smoothing: grayscale; 
+            font-family: 'Inter', sans-serif; 
+        }
         body.modal-open { overflow: hidden; }
-        #global-tooltip { position: fixed; visibility: hidden; opacity: 0; transition: opacity 0.2s ease-in-out; z-index: 1000; max-width: 24rem; pointer-events: none; }
-        .ribbon { position: relative; cursor: pointer; padding: 1px 4px; border-radius: 4px; font-weight: 500; transition: all 0.2s ease-in-out; }
+
+        /* Tooltip */
+        #global-tooltip { 
+            position: fixed; 
+            visibility: hidden; 
+            opacity: 0; 
+            transition: opacity 0.2s ease-in-out; 
+            z-index: 1000; 
+            max-width: 24rem; 
+            pointer-events: none; 
+        }
+
+        /* Diagnostic Ribbons */
+        .ribbon { 
+            position: relative; 
+            cursor: pointer; 
+            padding: 1px 4px; 
+            border-radius: 4px; 
+            font-weight: 500; 
+            transition: all 0.2s ease-in-out; 
+        }
         .ribbon-analyst { background-color: rgba(59, 130, 246, 0.2); color: #1d4ed8; border-bottom: 2px dotted #3b82f6; }
         .ribbon-architect { background-color: rgba(249, 115, 22, 0.2); color: #b45309; border-bottom: 2px dashed #f97316; }
         .ribbon-stylist { background-color: rgba(34, 197, 94, 0.2); color: #15803d; border-bottom: 2px dotted #22c55e; }
         .ribbon:hover { filter: brightness(1.1); }
-        .errors-hidden .ribbon { background-color: transparent !important; color: inherit !important; border-bottom-color: transparent !important; font-weight: normal; cursor: default; }
+        .errors-hidden .ribbon { 
+            background-color: transparent !important; 
+            color: inherit !important; 
+            border-bottom-color: transparent !important; 
+            font-weight: normal; 
+            cursor: default; 
+        }
         
+        /* Revision Visibility Toggle */
         .revision-hidden .revision-cell {
             color: transparent !important;
             user-select: none;
             background-color: #f9fafb !important;
         }
+        .revision-hidden .revision-cell .copy-btn {
+            opacity: 0;
+            pointer-events: none;
+        }
 
-        .table-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background-color: #e5e7eb; }
-        .table-cell { background-color: white; padding: 1rem; line-height: 1.75; word-break: break-word; white-space: pre-wrap; transition: background-color 0.3s, color 0.3s; }
+        /* Main Table Grid Layout */
+        .table-grid { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 1px; 
+            background-color: #e5e7eb; 
+        }
+        .table-cell { 
+            background-color: white; 
+            padding: 1rem; 
+            line-height: 1.75; 
+            word-break: break-word; 
+            white-space: pre-wrap; 
+            transition: background-color 0.3s, color 0.3s;
+            position: relative;
+        }
         @media (max-width: 768px) {
             .table-grid { grid-template-columns: 1fr; }
             .table-header { font-weight: bold; background-color: #f9fafb; padding-top: 1.5rem; }
         }
+        
+        /* Modals & Toggles */
         .modal-overlay { transition: opacity 0.3s ease; }
         .modal-content { transition: transform 0.3s ease; }
         .toggle-checkbox:checked + .toggle-label { background-color: #3b82f6; }
         .toggle-checkbox:checked + .toggle-label::after { transform: translateX(100%); }
+        
+        /* File Drop Zone */
         .drop-zone.drag-over { border-color: #3b82f6; background-color: #eff6ff; }
 
-        /* New styles for diagnostic identifiers and highlighting */
+        /* Diagnostic Identifiers & Highlighting */
         .diag-identifier {
             display: inline-block;
             width: 0.75rem; /* 12px */
@@ -49,12 +104,52 @@
         .diag-identifier:hover {
             transform: scale(1.3);
             border-color: rgba(0, 0, 0, 0.4);
+            animation: pulse-diag 1.5s infinite;
+        }
+        @keyframes pulse-diag {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.1); }
+            50% { box-shadow: 0 0 0 6px rgba(0, 0, 0, 0); }
         }
         .highlight-active {
             outline: 2px solid #ef4444; /* red-500 */
             outline-offset: 2px;
             box-shadow: 0 0 12px 2px rgba(239, 68, 68, 0.5);
             border-radius: 4px;
+        }
+
+        /* Copy Button */
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background-color: rgba(243, 244, 246, 0.7); /* gray-100 with opacity */
+            border: 1px solid #e5e7eb; /* gray-200 */
+            color: #4b5563; /* gray-600 */
+            border-radius: 0.375rem; /* rounded-md */
+            padding: 0.25rem;
+            opacity: 0;
+            transition: opacity 0.2s, background-color 0.2s, color 0.2s;
+            cursor: pointer;
+        }
+        .table-cell:hover .copy-btn {
+            opacity: 1;
+        }
+        .copy-btn:hover {
+            background-color: #e5e7eb; /* gray-200 */
+            color: #1f2937; /* gray-800 */
+        }
+
+        /* Toast Notification */
+        #toast-notification {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translate(-50%, 150%);
+            transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            z-index: 2000;
+        }
+        #toast-notification.show {
+            transform: translate(-50%, 0);
         }
     </style>
 </head>
@@ -63,25 +158,26 @@
     <div id="app" class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
         <header class="bg-white/80 backdrop-blur-md p-4 rounded-xl shadow-lg sticky top-4 z-20 border border-gray-200">
             <div class="flex flex-wrap justify-between items-center gap-4 mb-4">
-                <h1 class="text-xl md:text-2xl font-bold text-gray-900">Interactive Persona Translation Analyzer</h1>
-                <div class="flex items-center space-x-4">
-                    <div class="flex items-center space-x-6 border-r border-gray-300 pr-6 mr-2">
+                <h1 class="text-xl md:text-2xl font-bold text-gray-900">Persona Translation Analyzer</h1>
+                <div class="flex items-center space-x-2 sm:space-x-4">
+                    <div class="flex items-center space-x-3 sm:space-x-6 border-r border-gray-300 pr-3 sm:pr-6 mr-1 sm:mr-2">
                         <div class="flex items-center">
-                            <span class="text-sm font-medium text-gray-700 mr-3">Diagnostics</span>
+                            <span class="text-sm font-medium text-gray-700 mr-2 sm:mr-3">Diagnostics</span>
                             <label for="error-toggle" class="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" id="error-toggle" class="sr-only toggle-checkbox" checked>
                                 <div class="toggle-label w-11 h-6 bg-gray-300 rounded-full transition-colors duration-300 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-transform after:duration-300"></div>
                             </label>
                         </div>
                         <div class="flex items-center">
-                            <span class="text-sm font-medium text-gray-700 mr-3">Revision</span>
+                            <span class="text-sm font-medium text-gray-700 mr-2 sm:mr-3">Revision</span>
                             <label for="revision-toggle" class="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" id="revision-toggle" class="sr-only toggle-checkbox">
                                 <div class="toggle-label w-11 h-6 bg-gray-300 rounded-full transition-colors duration-300 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-transform after:duration-300"></div>
                             </label>
                         </div>
                     </div>
-                    <label for="file-upload" class="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-blue-700 active:bg-blue-800 transition-all">Load Cases (JSON)</label>
+                    <button id="reset-btn" class="hidden bg-gray-200 text-gray-700 px-3 py-2 rounded-lg font-semibold text-sm hover:bg-gray-300 active:bg-gray-400 transition-all">Reset</button>
+                    <label for="file-upload" class="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-blue-700 active:bg-blue-800 transition-all">Load JSON</label>
                     <input type="file" id="file-upload" class="hidden" accept=".json">
                 </div>
             </div>
@@ -94,50 +190,187 @@
 
         <main id="main-content" class="mt-6">
             <div id="cases-container">
-                 <div id="drop-zone" class="drop-zone text-center text-gray-500 py-16 border-2 border-dashed border-gray-300 rounded-xl transition-colors cursor-pointer">
-                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                    <p class="mt-4 text-lg font-medium">Drag & drop your `cases.json` file here</p>
-                    <p>or <strong class="text-blue-600">click here</strong> to select a file</p>
-                </div>
+                 <!-- Initial state / Drop zone will be injected here by JS -->
             </div>
         </main>
     </div>
     
     <!-- Modals -->
-    <div id="modal-analyst" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden opacity-0"><div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-md p-6 transform scale-95"><div class="flex items-start justify-between"><h3 class="text-xl font-bold text-blue-600">The Analyst</h3><button class="modal-close text-gray-500 hover:text-gray-800 text-2xl">&times;</button></div><p class="mt-4 text-gray-700"><strong>Core Mandate:</strong> To achieve a complete, nuanced, and context-aware understanding of the source text's meaning, intent, and subtext. The Analyst's loyalty is 100% to the source.</p><p class="mt-2 text-gray-600">Their primary failure mode is <strong>Knowledge Deficit</strong>, stemming from a lack of domain-specific knowledge or a failure to grasp subtle linguistic cues.</p></div></div>
-    <div id="modal-architect" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden opacity-0"><div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-md p-6 transform scale-95"><div class="flex items-start justify-between"><h3 class="text-xl font-bold text-orange-600">The Architect</h3><button class="modal-close text-gray-500 hover:text-gray-800 text-2xl">&times;</button></div><p class="mt-4 text-gray-700"><strong>Core Mandate:</strong> To deverbalize the source meaning and reconstruct it within a natural, logical, and idiomatic target-language structure, completely severing the umbilical cord of the source syntax.</p><p class="mt-2 text-gray-600">Their primary failure mode is <strong>Process Discipline Failure</strong>, a default to replicating the source structure out of inertia.</p></div></div>
-    <div id="modal-stylist" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden opacity-0"><div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-md p-6 transform scale-95"><div class="flex items-start justify-between"><h3 class="text-xl font-bold text-green-600">The Stylist</h3><button class="modal-close text-gray-500 hover:text-gray-800 text-2xl">&times;</button></div><p class="mt-4 text-gray-700"><strong>Core Mandate:</strong> To craft the final text with lexical precision, idiomatic grace, and stylistic appropriateness. The Stylist's loyalty is 100% to the target language and its reader.</p><p class="mt-2 text-gray-600">Their failure modes are a <strong>Resource Gap</strong> (lexical awkwardness) or <strong>Process Failure</strong> (a lapse in diligence and polish).</p></div></div>
+    <div id="modal-analyst" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden opacity-0" role="dialog" aria-modal="true" aria-labelledby="modal-analyst-title">
+        <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-md p-6 transform scale-95">
+            <div class="flex items-start justify-between">
+                <h3 id="modal-analyst-title" class="text-xl font-bold text-blue-600 flex items-center">
+                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    The Analyst
+                </h3>
+                <button class="modal-close text-gray-500 hover:text-gray-800 text-2xl" aria-label="Close modal">&times;</button>
+            </div>
+            <p class="mt-4 text-gray-700"><strong>Core Mandate:</strong> To achieve a complete, nuanced, and context-aware understanding of the source text's meaning, intent, and subtext. The Analyst's loyalty is 100% to the source.</p>
+            <p class="mt-2 text-gray-600">Their primary failure mode is <strong>Knowledge Deficit</strong>, stemming from a lack of domain-specific knowledge or a failure to grasp subtle linguistic cues.</p>
+        </div>
+    </div>
+    <div id="modal-architect" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden opacity-0" role="dialog" aria-modal="true" aria-labelledby="modal-architect-title">
+        <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-md p-6 transform scale-95">
+            <div class="flex items-start justify-between">
+                <h3 id="modal-architect-title" class="text-xl font-bold text-orange-600 flex items-center">
+                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.5 6.5a2.5 2.5 0 115 0 2.5 2.5 0 01-5 0zm12 11a2.5 2.5 0 115 0 2.5 2.5 0 01-5 0zM3.5 17.5a2.5 2.5 0 105 0 2.5 2.5 0 00-5 0z"></path></svg>
+                    The Architect
+                </h3>
+                <button class="modal-close text-gray-500 hover:text-gray-800 text-2xl" aria-label="Close modal">&times;</button>
+            </div>
+            <p class="mt-4 text-gray-700"><strong>Core Mandate:</strong> To deverbalize the source meaning and reconstruct it within a natural, logical, and idiomatic target-language structure, completely severing the umbilical cord of the source syntax.</p>
+            <p class="mt-2 text-gray-600">Their primary failure mode is <strong>Process Discipline Failure</strong>, a default to replicating the source structure out of inertia.</p>
+        </div>
+    </div>
+    <div id="modal-stylist" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden opacity-0" role="dialog" aria-modal="true" aria-labelledby="modal-stylist-title">
+        <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-md p-6 transform scale-95">
+            <div class="flex items-start justify-between">
+                <h3 id="modal-stylist-title" class="text-xl font-bold text-green-600 flex items-center">
+                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z"></path></svg>
+                    The Stylist
+                </h3>
+                <button class="modal-close text-gray-500 hover:text-gray-800 text-2xl" aria-label="Close modal">&times;</button>
+            </div>
+            <p class="mt-4 text-gray-700"><strong>Core Mandate:</strong> To craft the final text with lexical precision, idiomatic grace, and stylistic appropriateness. The Stylist's loyalty is 100% to the target language and its reader.</p>
+            <p class="mt-2 text-gray-600">Their failure modes are a <strong>Resource Gap</strong> (lexical awkwardness) or <strong>Process Failure</strong> (a lapse in diligence and polish).</p>
+        </div>
+    </div>
     
-    <div id="global-tooltip" class="p-3 bg-gray-900 text-white text-sm rounded-lg shadow-xl border border-gray-700"></div>
+    <!-- Global Tooltip -->
+    <div id="global-tooltip" class="p-3 bg-gray-900 text-white text-sm rounded-lg shadow-xl border border-gray-700" role="tooltip"></div>
+
+    <!-- Toast Notification -->
+    <div id="toast-notification" class="bg-gray-900 text-white font-semibold py-2 px-5 rounded-full shadow-lg">
+        <p id="toast-message"></p>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // --- CONFIG & STATE ---
+            const appConfig = {
+                toastDuration: 2000,
+            };
+            let diagnosisDataStore = {};
+            let toastTimeout;
+
+            // --- DOM ELEMENTS ---
             const fileUpload = document.getElementById('file-upload');
             const casesContainer = document.getElementById('cases-container');
             const mainContent = document.getElementById('main-content');
             const errorToggle = document.getElementById('error-toggle');
             const revisionToggle = document.getElementById('revision-toggle');
             const globalTooltip = document.getElementById('global-tooltip');
-            const dropZone = document.getElementById('drop-zone');
-            let diagnosisDataStore = {};
+            const resetBtn = document.getElementById('reset-btn');
 
-            fileUpload.addEventListener('change', (e) => handleFile(e.target.files[0]));
-            errorToggle.addEventListener('change', () => mainContent.classList.toggle('errors-hidden', !errorToggle.checked));
-            revisionToggle.addEventListener('change', () => mainContent.classList.toggle('revision-hidden', !revisionToggle.checked));
-            
-            dropZone.addEventListener('click', () => fileUpload.click());
-            dropZone.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); dropZone.classList.add('drag-over'); });
-            dropZone.addEventListener('dragleave', (e) => { e.preventDefault(); e.stopPropagation(); dropZone.classList.remove('drag-over'); });
-            dropZone.addEventListener('drop', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                dropZone.classList.remove('drag-over');
-                handleFile(e.dataTransfer.files[0]);
-            });
+            // --- SAMPLE DATA ---
+            const sampleData = {
+                "cases": [
+                    {
+                        "id": "sample-1",
+                        "sourceText": "This is a matter of major importance.",
+                        "translationText": "This is a very important matter.",
+                        "revisionText": "This is a matter of great importance.",
+                        "diagnostics": [
+                            {
+                                "persona": "The Stylist",
+                                "cause": "Lexical Awkwardness",
+                                "explanation": "While 'very important' is correct, 'of great importance' better reflects the formal register of the source text. 'Major' carries a weight that 'very' doesn't quite capture.",
+                                "target_phrase": "very important"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "sample-2",
+                        "sourceText": "The company's quarterly earnings report surprised analysts, who had predicted a downturn.",
+                        "translationText": "The company's quarterly earnings report surprised analysts, they had predicted a downturn.",
+                        "revisionText": "The company's quarterly earnings report surprised analysts who had predicted a downturn.",
+                        "diagnostics": [
+                            {
+                                "persona": "The Architect",
+                                "cause": "Process Discipline Failure",
+                                "explanation": "This is a comma splice, a common error when translating from languages where this structure is more permissible. English requires a proper conjunction or relative pronoun ('who') to connect these clauses.",
+                                "target_phrase": "analysts, they"
+                            }
+                        ]
+                    },
+                     {
+                        "id": "sample-3",
+                        "sourceText": "He was over the moon about the promotion.",
+                        "translationText": "He was on the moon about the promotion.",
+                        "revisionText": "He was ecstatic about the promotion.",
+                        "diagnostics": [
+                            {
+                                "persona": "The Analyst",
+                                "cause": "Knowledge Deficit",
+                                "explanation": "The idiom 'over the moon' means to be extremely happy. The translation 'on the moon' is a literal misinterpretation and loses the intended meaning.",
+                                "target_phrase": "on the moon"
+                            }
+                        ]
+                    }
+                ]
+            };
+
+            // --- INITIALIZATION ---
+            initApp();
+
+            function initApp() {
+                setupEventListeners();
+                resetApp();
+            }
+
+            // --- EVENT LISTENERS ---
+            function setupEventListeners() {
+                fileUpload.addEventListener('change', (e) => handleFile(e.target.files[0]));
+                errorToggle.addEventListener('change', () => mainContent.classList.toggle('errors-hidden', !errorToggle.checked));
+                revisionToggle.addEventListener('change', () => mainContent.classList.toggle('revision-hidden', !revisionToggle.checked));
+                resetBtn.addEventListener('click', resetApp);
+                
+                // Modal Listeners
+                document.querySelectorAll('[data-modal-target]').forEach(trigger => {
+                    trigger.addEventListener('click', () => openModal(document.getElementById(trigger.getAttribute('data-modal-target'))));
+                });
+                document.querySelectorAll('.modal-close, .modal-overlay').forEach(closer => {
+                    closer.addEventListener('click', (event) => {
+                        if (event.target === closer) closeModal(closer.closest('.modal-overlay'));
+                    });
+                });
+            }
+
+            // --- CORE LOGIC ---
+
+            function resetApp() {
+                casesContainer.innerHTML = `
+                    <div id="drop-zone" class="drop-zone text-center text-gray-500 py-16 border-2 border-dashed border-gray-300 rounded-xl transition-colors">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                        <p class="mt-4 text-lg font-medium">Drag & drop your <code class="bg-gray-200 text-gray-700 px-1 rounded-md">cases.json</code> file here</p>
+                        <p class="mt-1">or <strong class="text-blue-600 cursor-pointer" id="upload-link">click here</strong> to select a file</p>
+                        <div class="mt-8">
+                            <button id="load-sample-btn" class="bg-green-600 text-white px-5 py-2 rounded-lg font-semibold text-sm hover:bg-green-700 active:bg-green-800 transition-all">
+                                Or Load Sample Data
+                            </button>
+                        </div>
+                    </div>`;
+                
+                const dropZone = document.getElementById('drop-zone');
+                dropZone.addEventListener('click', (e) => {
+                    if (e.target.id === 'upload-link') fileUpload.click();
+                });
+                dropZone.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); dropZone.classList.add('drag-over'); });
+                dropZone.addEventListener('dragleave', (e) => { e.preventDefault(); e.stopPropagation(); dropZone.classList.remove('drag-over'); });
+                dropZone.addEventListener('drop', (e) => {
+                    e.preventDefault(); e.stopPropagation();
+                    dropZone.classList.remove('drag-over');
+                    handleFile(e.dataTransfer.files[0]);
+                });
+                
+                document.getElementById('load-sample-btn').addEventListener('click', () => renderCases(sampleData.cases));
+                resetBtn.classList.add('hidden');
+                updateStats({ "The Analyst": 0, "The Architect": 0, "The Stylist": 0 });
+            }
 
             function handleFile(file) {
                 if (!file || !file.type.match('json.*')) {
-                    alert('Please upload a valid JSON file.');
+                    showToast('Please upload a valid JSON file.', 'error');
                     return;
                 }
                 const reader = new FileReader();
@@ -158,7 +391,6 @@
                 diagnosisDataStore = {};
                 const stats = { "The Analyst": 0, "The Architect": 0, "The Stylist": 0 };
                 
-                dropZone.style.display = 'none';
                 casesContainer.className = 'border border-gray-200 rounded-xl shadow-lg overflow-hidden';
 
                 cases.forEach((caseData, index) => {
@@ -176,15 +408,14 @@
                         const bgColorClass = getPersonaBgClass(diag.persona);
                         return `<span class="diag-identifier ${bgColorClass}" data-highlight-target="${diag.id}" title="${diag.persona}: ${diag.cause}"></span>`;
                     }).join('');
-
+                    
+                    const caseId = `case-${index + 1}`;
                     allCasesHtml += `
                         <div class="case-block bg-white border-b border-gray-200 last:border-b-0">
                             <div class="p-4 border-b border-gray-200">
                                 <h2 class="text-xl font-bold text-gray-800 flex items-center">
                                     <span>Case ${index + 1}</span>
-                                    <div class="flex items-center ml-4">
-                                        ${diagnosticsIdentifiersHtml}
-                                    </div>
+                                    <div class="flex items-center ml-4">${diagnosticsIdentifiersHtml}</div>
                                     ${mismatchHtml}
                                 </h2>
                             </div>
@@ -194,21 +425,21 @@
                                 <div class="table-cell font-bold text-lg bg-gray-50 text-gray-900 hidden md:block revision-cell">Revised Text</div>
                                 
                                 <div class="table-cell table-header md:hidden">Source Text</div>
-                                <div class="table-cell">${escapeHtml(caseData.sourceText || '')}</div>
+                                <div class="table-cell" data-text-id="${caseId}-source">${escapeHtml(caseData.sourceText || '')}</div>
                                 
                                 <div class="table-cell table-header md:hidden">Draft Translation</div>
-                                <div class="table-cell">${html}</div>
+                                <div class="table-cell" data-text-id="${caseId}-draft">${html}</div>
 
                                 <div class="table-cell table-header md:hidden revision-cell">Revised Text</div>
-                                <div class="table-cell revision-cell">${escapeHtml(caseData.revisionText || '')}</div>
+                                <div class="table-cell revision-cell" data-text-id="${caseId}-revision">${escapeHtml(caseData.revisionText || '')}</div>
                             </div>
                         </div>`;
                 });
                 
                 casesContainer.innerHTML = allCasesHtml || `<div class="text-center text-gray-500 py-16"><p class="text-lg">No valid cases found.</p></div>`;
+                resetBtn.classList.remove('hidden');
                 updateStats(stats);
-                setupTooltipListeners();
-                setupIdentifierListeners();
+                setupDynamicListeners();
                 
                 mainContent.classList.remove('errors-hidden');
                 errorToggle.checked = true;
@@ -223,7 +454,6 @@
                     return { html: escapeHtml(text), mismatchCount: 0 };
                 }
 
-                let appliedAnnosCount = 0;
                 diagnostics.forEach((diag, index) => {
                     diag.id = `diag-${caseData.id || crypto.randomUUID()}-${index}`;
                     diagnosisDataStore[diag.id] = diag;
@@ -233,11 +463,10 @@
                     if (!anno.target_phrase) return null;
                     const startIndex = text.indexOf(anno.target_phrase);
                     if (startIndex === -1) return null;
-                    appliedAnnosCount++;
                     return { ...anno, startIndex, endIndex: startIndex + anno.target_phrase.length };
                 }).filter(Boolean);
 
-                const mismatchCount = diagnostics.length - appliedAnnosCount;
+                const mismatchCount = diagnostics.length - annotations.length;
                 const points = new Set([0, text.length]);
                 annotations.forEach(anno => {
                     points.add(anno.startIndex);
@@ -266,30 +495,46 @@
                 return { html: htmlParts.join(''), mismatchCount };
             }
 
-            function setupTooltipListeners() {
+            // --- DYNAMIC LISTENERS & UI UPDATES ---
+            function setupDynamicListeners() {
+                // Tooltips
                 document.querySelectorAll('.ribbon[data-tooltip-id]').forEach(ribbon => {
                     ribbon.addEventListener('mouseenter', showTooltip);
                     ribbon.addEventListener('mouseleave', hideTooltip);
                     ribbon.addEventListener('mousemove', (e) => positionTooltip(e));
                 });
-            }
 
-            function setupIdentifierListeners() {
+                // Diagnostic Identifiers
                 document.querySelectorAll('.diag-identifier').forEach(identifier => {
                     const targetId = identifier.getAttribute('data-highlight-target');
                     const ribbon = document.querySelector(`.ribbon[data-tooltip-id="${targetId}"]`);
-                    
                     if (ribbon) {
-                        identifier.addEventListener('mouseenter', () => {
-                            ribbon.classList.add('highlight-active');
-                        });
-                        identifier.addEventListener('mouseleave', () => {
-                            ribbon.classList.remove('highlight-active');
-                        });
+                        identifier.addEventListener('mouseenter', () => ribbon.classList.add('highlight-active'));
+                        identifier.addEventListener('mouseleave', () => ribbon.classList.remove('highlight-active'));
                     }
+                });
+
+                // Copy Buttons
+                document.querySelectorAll('.table-cell[data-text-id]').forEach(cell => {
+                    const copyButton = document.createElement('button');
+                    copyButton.className = 'copy-btn';
+                    copyButton.title = 'Copy to clipboard';
+                    copyButton.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>`;
+                    copyButton.addEventListener('click', () => {
+                        copyToClipboard(cell.innerText);
+                        showToast('Copied to clipboard!');
+                    });
+                    cell.appendChild(copyButton);
                 });
             }
 
+            function updateStats(stats) {
+                document.getElementById('stat-analyst').textContent = ` (${stats["The Analyst"]})`;
+                document.getElementById('stat-architect').textContent = ` (${stats["The Architect"]})`;
+                document.getElementById('stat-stylist').textContent = ` (${stats["The Stylist"]})`;
+            }
+
+            // --- TOOLTIP & MODAL ---
             function showTooltip(event) {
                 if (mainContent.classList.contains('errors-hidden')) return;
                 const ribbon = event.target;
@@ -324,13 +569,26 @@
             }
 
             function hideTooltip() { globalTooltip.style.visibility = 'hidden'; globalTooltip.style.opacity = '0'; }
-            
-            function updateStats(stats) {
-                document.getElementById('stat-analyst').textContent = ` (${stats["The Analyst"]})`;
-                document.getElementById('stat-architect').textContent = ` (${stats["The Architect"]})`;
-                document.getElementById('stat-stylist').textContent = ` (${stats["The Stylist"]})`;
+
+            function openModal(modal) {
+                if (!modal) return;
+                document.body.classList.add('modal-open');
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.classList.remove('opacity-0');
+                    modal.querySelector('.modal-content').classList.remove('scale-95');
+                }, 10);
             }
 
+            function closeModal(modal) {
+                if (!modal) return;
+                document.body.classList.remove('modal-open');
+                modal.classList.add('opacity-0');
+                modal.querySelector('.modal-content').classList.add('scale-95');
+                setTimeout(() => modal.classList.add('hidden'), 300);
+            }
+            
+            // --- UTILITIES ---
             function getRibbonClass(persona) {
                 if (persona === "The Analyst") return "ribbon-analyst";
                 if (persona === "The Architect") return "ribbon-architect";
@@ -350,35 +608,38 @@
                 return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
             }
 
-            document.querySelectorAll('[data-modal-target]').forEach(trigger => {
-                trigger.addEventListener('click', () => openModal(document.getElementById(trigger.getAttribute('data-modal-target'))));
-            });
-            document.querySelectorAll('.modal-close, .modal-overlay').forEach(closer => {
-                closer.addEventListener('click', (event) => {
-                    if (event.target === closer) {
-                        closeModal(closer.closest('.modal-overlay'));
-                    }
-                });
-            });
-
-            function openModal(modal) {
-                if (!modal) return;
-                document.body.classList.add('modal-open');
-                modal.classList.remove('hidden');
-                setTimeout(() => {
-                    modal.classList.remove('opacity-0');
-                    modal.querySelector('.modal-content').classList.remove('scale-95');
-                }, 10);
+            function showToast(message, type = 'success') {
+                const toast = document.getElementById('toast-notification');
+                const toastMessage = document.getElementById('toast-message');
+                
+                toastMessage.textContent = message;
+                toast.className = `bg-gray-900 text-white font-semibold py-2 px-5 rounded-full shadow-lg`; // Reset class
+                if (type === 'error') {
+                    toast.classList.replace('bg-gray-900', 'bg-red-600');
+                }
+                
+                toast.classList.add('show');
+                clearTimeout(toastTimeout);
+                toastTimeout = setTimeout(() => {
+                    toast.classList.remove('show');
+                }, appConfig.toastDuration);
             }
 
-            function closeModal(modal) {
-                if (!modal) return;
-                document.body.classList.remove('modal-open');
-                modal.classList.add('opacity-0');
-                modal.querySelector('.modal-content').classList.add('scale-95');
-                setTimeout(() => {
-                    modal.classList.add('hidden');
-                }, 300);
+            function copyToClipboard(text) {
+                // This fallback method is more reliable in sandboxed environments like iframes.
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-9999px';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                } catch (err) {
+                    console.error('Fallback: Oops, unable to copy', err);
+                }
+                document.body.removeChild(textArea);
             }
         });
     </script>
