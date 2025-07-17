@@ -63,8 +63,16 @@ Each **diagnostic object** must contain:
     
 -   `explanation`: (String) A concise but thorough explanation of the issue, referencing the framework.
     
--   `target_phrase`: (String) **[CRITICAL]** The most specific, concise phrase or clause in the **Translation** that best exemplifies the diagnosed error. Your primary goal is precision. **Under no circumstances should you select the entire sentence**, unless the sentence itself is a single, short phrase. Always isolate the smallest possible group of words that contains the core of the issue.
+-   `target_phrase`: (String) **[CRITICAL]** The most specific, concise, and **contiguous** phrase or clause from the **Translation** that exemplifies the error.
     
+    -   **Rule of Contiguity:** The value for `target_phrase` **must** be a literal, uninterrupted substring of the `translationText`. It must be able to be found using a simple string search. **Do not use ellipses (`...`)** or any other method to represent discontinuous text.
+        
+    -   **Strategy for Discontinuous Errors:** Occasionally, a single conceptual error may manifest in multiple, separate words (e.g., a weak verb at the beginning of a sentence and a mismatched noun at the end). In such cases:
+        
+        1.  First, attempt to find a single, larger contiguous phrase that includes the problematic words without becoming overly long or including too much correct text.
+            
+        2.  If that is not possible, you must choose the **single most representative segment** that contains the core of the issue. If the parts are equally problematic, select the one that occurs first in the sentence. For instance, in the case of a translation containing `"possessed... and was,"` if `"possessed"` is the primary stylistic weakness, the `target_phrase` should be just `"possessed"`.
+            
 
 ### Example
 
