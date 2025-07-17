@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>本地翻译诊断JSON生成器 (v4)</title>
+    <title>Persona Translation Diagnostic JSON Generator (v8)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; font-family: 'Inter', sans-serif; }
@@ -22,65 +22,61 @@
     <div id="app" class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
         <div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
             <header class="mb-6 text-center">
-                <h1 class="text-3xl font-bold text-gray-900">本地翻译诊断JSON生成器 (v4)</h1>
-                <p class="mt-2 text-gray-600">通过“侦探-设计师-化妆师”框架，利用AI分析翻译案卷并生成包含 `target_phrase` 的标准化JSON文件。</p>
+                <h1 class="text-3xl font-bold text-gray-900">Persona Translation Diagnostic JSON Generator (v8)</h1>
+                <p class="mt-2 text-gray-600">Leverage AI to analyze translation triptychs via the "Analyst-Architect-Stylist" framework and generate a standardized JSON file.</p>
             </header>
 
             <div class="space-y-6">
-                <!-- Step 1: Configuration -->
                 <div>
-                    <h2 class="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">1. 配置</h2>
+                    <h2 class="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">1. Configuration</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label for="apiKey" class="block text-sm font-medium text-gray-700">Gemini API 密钥</label>
-                            <input type="password" id="apiKey" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="在此处粘贴您的密钥">
-                            <p class="mt-1 text-xs text-gray-500">密钥保存在会话中，关闭标签页后清除。</p>
+                            <label for="apiKey" class="block text-sm font-medium text-gray-700">Gemini API Key</label>
+                            <input type="password" id="apiKey" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Paste your key here">
+                            <p class="mt-1 text-xs text-gray-500">Key is stored in session and cleared on tab close.</p>
                         </div>
                         <div>
-                            <label for="modelName" class="block text-sm font-medium text-gray-700">模型名称</label>
+                            <label for="modelName" class="block text-sm font-medium text-gray-700">Model Name</label>
                             <input type="text" id="modelName" value="gemini-1.5-pro-latest" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                         </div>
                     </div>
                 </div>
 
-                <!-- Step 2: Input -->
                 <div>
-                    <h2 class="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">2. 输入</h2>
+                    <h2 class="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">2. Input</h2>
                     <div>
-                        <label for="context" class="block text-sm font-medium text-gray-700">上下文 (可选)</label>
-                        <textarea id="context" rows="2" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="例如：The source text is a report written by Rand and commissioned by DOD."></textarea>
+                        <label for="context" class="block text-sm font-medium text-gray-700">Context (Optional)</label>
+                        <textarea id="context" rows="2" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., The source text is a report written by Rand and commissioned by DOD."></textarea>
                     </div>
                     <div class="mt-4">
-                        <label for="fileUpload" class="block text-sm font-medium text-gray-700">案卷文件 (.txt)</label>
+                        <label for="fileUpload" class="block text-sm font-medium text-gray-700">Case File (.txt)</label>
                         <div id="dropZone" class="drop-zone mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer transition-colors">
                             <div class="space-y-1 text-center">
                                 <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
                                 <div class="flex text-sm text-gray-600">
                                     <label for="fileUploadInput" class="relative bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
-                                        <span>上传文件</span>
+                                        <span>Upload a file</span>
                                         <input id="fileUploadInput" name="file-upload" type="file" class="sr-only" accept=".txt">
                                     </label>
-                                    <p class="pl-1">或拖拽到此处</p>
+                                    <p class="pl-1">or drag and drop</p>
                                 </div>
-                                <p id="fileName" class="text-xs text-gray-500">请上传包含翻译三联体的 .txt 文件</p>
+                                <p id="fileName" class="text-xs text-gray-500">Upload a .txt file with translation triptychs</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Step 3: Execution -->
                 <div>
-                    <h2 class="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">3. 执行</h2>
+                    <h2 class="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">3. Execution</h2>
                     <button id="startButton" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed">
-                        开始分析
+                        Run Analysis
                     </button>
                 </div>
 
-                <!-- Step 4: Log -->
                 <div>
-                    <h2 class="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">4. 状态日志</h2>
+                    <h2 class="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">4. Status Log</h2>
                     <div id="log" class="w-full h-48 bg-gray-900 text-white font-mono text-sm p-4 rounded-md overflow-y-auto">
-                        <p class="text-gray-400">等待开始...</p>
+                        <p class="text-gray-400">Waiting to start...</p>
                     </div>
                 </div>
             </div>
@@ -89,7 +85,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // --- Element Selectors ---
             const apiKeyInput = document.getElementById('apiKey');
             const modelNameInput = document.getElementById('modelName');
             const contextInput = document.getElementById('context');
@@ -98,18 +93,13 @@
             const startButton = document.getElementById('startButton');
             const logContainer = document.getElementById('log');
             const dropZone = document.getElementById('dropZone');
-
             let uploadedFile = null;
 
-            // --- Event Listeners ---
             fileUploadInput.addEventListener('change', (event) => handleFileSelect(event.target.files));
             startButton.addEventListener('click', runAnalysis);
-            
-            // API Key Caching in sessionStorage
             apiKeyInput.addEventListener('input', (e) => sessionStorage.setItem('geminiApiKey', e.target.value));
             apiKeyInput.value = sessionStorage.getItem('geminiApiKey') || '';
 
-            // Drag and Drop Listeners
             dropZone.addEventListener('click', () => fileUploadInput.click());
             dropZone.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); dropZone.classList.add('drag-over'); });
             dropZone.addEventListener('dragleave', (e) => { e.preventDefault(); e.stopPropagation(); dropZone.classList.remove('drag-over'); });
@@ -130,16 +120,11 @@
             }
 
             function log(message, type = 'info') {
-                const typeClasses = {
-                    info: 'log-info text-blue-300',
-                    success: 'log-success text-green-300',
-                    warn: 'log-warn text-orange-300',
-                    error: 'log-error text-red-300'
-                };
+                const typeClasses = { info: 'log-info text-blue-300', success: 'log-success text-green-300', warn: 'log-warn text-orange-300', error: 'log-error text-red-300' };
                 const entry = document.createElement('p');
                 entry.className = `log-entry pl-2 my-1 ${typeClasses[type]}`;
                 entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-                if (logContainer.firstChild?.textContent === '等待开始...') {
+                if (logContainer.firstChild?.textContent === 'Waiting to start...') {
                     logContainer.innerHTML = '';
                 }
                 logContainer.appendChild(entry);
@@ -150,72 +135,49 @@
                 const apiKey = apiKeyInput.value;
                 const modelName = modelNameInput.value;
                 const context = contextInput.value;
-
-                if (!apiKey) {
-                    log('错误：API密钥不能为空。', 'error');
-                    return;
-                }
-                if (!uploadedFile) {
-                    log('错误：请先上传一个案卷文件。', 'error');
-                    return;
-                }
+                if (!apiKey) { log('Error: API Key cannot be empty.', 'error'); return; }
+                if (!uploadedFile) { log('Error: Please upload a case file first.', 'error'); return; }
 
                 startButton.disabled = true;
-                startButton.innerHTML = `
-                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    正在处理...
-                `;
-                logContainer.innerHTML = ''; // Clear log
+                startButton.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Processing...`;
+                logContainer.innerHTML = '';
 
                 try {
-                    log('开始处理流程...');
-                    log(`使用的模型: ${modelName}`);
-
+                    log('Starting analysis process...');
+                    log(`Using model: ${modelName}`);
                     const fileContent = await uploadedFile.text();
                     const allCases = parseFileContent(fileContent);
-                    if (allCases.length === 0) {
-                        throw new Error('文件中未找到任何有效案例。');
-                    }
-                    log(`文件解析完成，共找到 ${allCases.length} 个有效案例。`, 'success');
+                    if (allCases.length === 0) { throw new Error('No valid cases found in the file.'); }
+                    log(`File parsed successfully. Found ${allCases.length} valid cases.`, 'success');
 
                     const BATCH_SIZE = 5;
-                    log(`将以每批最多 ${BATCH_SIZE} 个案例进行处理。`);
-
+                    log(`Processing in batches of up to ${BATCH_SIZE} cases.`);
                     const finalCasesData = { cases: [] };
                     for (let i = 0; i < allCases.length; i += BATCH_SIZE) {
                         const batch = allCases.slice(i, i + BATCH_SIZE);
                         const startNum = i + 1;
                         const endNum = Math.min(i + BATCH_SIZE, allCases.length);
-                        log(`正在分析批次 ${startNum}-${endNum}...`);
-
+                        log(`Analyzing batch ${startNum}-${endNum}...`);
                         const batchDiagnostics = await analyzeBatchRecursive(batch, context, modelName, apiKey);
-                        
                         if (batchDiagnostics) {
                             for (const caseData of batch) {
                                 const diagnostics = batchDiagnostics[caseData.id] || [];
                                 caseData.diagnostics = diagnostics;
                                 finalCasesData.cases.push(caseData);
                             }
-                            log(`批次 ${startNum}-${endNum} 分析完成。`, 'success');
+                            log(`Batch ${startNum}-${endNum} analyzed successfully.`, 'success');
                         } else {
-                            log(`批次 ${startNum}-${endNum} 分析失败，已跳过。`, 'error');
+                            log(`Batch ${startNum}-${endNum} failed analysis and was skipped.`, 'error');
                         }
-                        if (i + BATCH_SIZE < allCases.length) {
-                           await new Promise(resolve => setTimeout(resolve, 1000)); // Rate limiting
-                        }
+                        if (i + BATCH_SIZE < allCases.length) { await new Promise(resolve => setTimeout(resolve, 1000)); }
                     }
-
-                    log('所有批次处理完毕！正在生成JSON文件...', 'success');
+                    log('All batches processed! Generating JSON file...', 'success');
                     downloadJson(finalCasesData, 'cases.json');
-
                 } catch (error) {
-                    log(`处理过程中发生严重错误: ${error.message}`, 'error');
+                    log(`A critical error occurred during processing: ${error.message}`, 'error');
                 } finally {
                     startButton.disabled = false;
-                    startButton.textContent = '开始分析';
+                    startButton.textContent = 'Run Analysis';
                 }
             }
             
@@ -232,7 +194,7 @@
                             revisionText: lines[2].trim()
                         });
                     } else if (lines.length > 0) {
-                        log(`警告：跳过格式不正确的文本块（应为三行）。`, 'warn');
+                        log(`Warning: Skipping malformed text block (should have 3 lines).`, 'warn');
                     }
                 });
                 return cases;
@@ -242,41 +204,40 @@
                 if (!batch.length) return {};
 
                 const system_prompt = `
-你是一名专业的翻译分析工具。你的任务是分析一批由“原文”、“待分析译文”和“审校稿”组成的翻译案卷。
-请严格遵循“三人格”框架（侦探、设计师、化妆师）来诊断每个案卷中“待分析译文”的问题。
+You are a professional translation analysis tool. Your task is to analyze a batch of translation cases, each composed of a "Source Text," a "Draft Translation," and a "Revised Text."
+You must strictly adhere to the "Three-Persona" framework (The Analyst, The Architect, The Stylist) to diagnose issues in the "Draft Translation."
 
-三人格框架定义如下：
-1.  **侦探 (The Detective)**: 负责勘查原文，确保完全、精准地理解其事实、意图和潜台词。失职表现为【知识匮乏】。
-2.  **设计师 (The Designer)**: 负责解构原文，在目标语中设计出自然、地道的句法结构，摆脱原文束缚。失职表现为【流程失败】。
-3.  **化妆师 (The Make-up Artist)**: 负责终稿的润色，选择精准、优雅的词汇，确保语域得体、无低级错误。失职分为两种：【资源匮乏】（词汇量不足）或【流程失败】（不够勤勉）。
+The Three-Persona Framework is defined as follows:
+1.  **The Analyst**: Responsible for achieving a complete, nuanced, and context-aware understanding of the source text's meaning, intent, and subtext. Their primary failure mode is **"Knowledge Deficit."**
+2.  **The Architect**: Responsible for deverbalizing the source meaning and reconstructing it within a natural, logical, and idiomatic target-language structure. Their primary failure mode is **"Process Discipline Failure."**
+3.  **The Stylist**: Responsible for crafting the final text with lexical precision, idiomatic grace, and stylistic appropriateness. Their failure modes are **"Resource Gap"** (e.g., for awkward lexical choices) or **"Process Failure"** (e.g., for typos or basic grammatical mistakes).
 
-你的分析必须以一个单一JSON对象的形式返回，不包含任何JSON格式之外的解释性文字。
-- 这个JSON对象的**键**是每个案卷的\`case_id\`。
-- **值**是一个JSON数组，其中每个元素代表一个在该案卷中发现的错误。
-- 每个错误对象必须包含以下字段:
-    - **original_phrase**: 原文中与错误相关的短语或句子。
-    - **target_phrase**: **【关键】** 待分析译文中**最能体现该错误的具体短语或从句**。即使是关于整体结构或语气的句子层面问题，也请尽力定位到最能代表该问题的**关键部分**，而不是返回整个句子。例如，对于翻译腔，定位到最生硬的那个从句；对于语气错误，定位到最能体现错误语气的那个词。
-    - **persona**: 导致错误的责任人格（"侦探"、"设计师"或"化妆师"）。
-    - **cause**: 错误的具体原因（"知识匮乏"、"流程失败"或"资源匮乏"）。
-    - **explanation**: 对错误的详细解释。
+Your analysis must be returned as a single JSON object, without any explanatory text outside the JSON format itself.
+- The **keys** of this JSON object must be the \`case_id\` of each case.
+- The **value** for each key must be a JSON array, where each element represents a single error found in that case.
+- Each error object must contain the following fields:
+    - **persona**: The responsible persona ("The Analyst", "The Architect", or "The Stylist").
+    - **cause**: The specific failure mode ("Knowledge Deficit", "Process Discipline Failure", "Resource Gap", or "Process Failure").
+    - **original_phrase**: The phrase from the source text that relates to the error.
+    - **explanation**: A detailed explanation of the error, referencing the framework.
+    - **target_phrase**: **[CRITICAL]** The most specific, concise phrase or clause within the Draft Translation that best exemplifies the error. Your primary goal is precision. **Under no circumstances should you select the entire sentence**, unless the sentence itself is a single, short phrase. Always strive to isolate the smallest possible group of words that contains the core of the issue.
 
-请确保JSON格式绝对正确，以便程序解析。`;
+Ensure the JSON is perfectly formatted for programmatic parsing.`;
 
-                let userPromptParts = ["请分析以下这批翻译案卷："];
-                if (context) userPromptParts.push(`\n**附加上下文信息:**\n${context}`);
+                let userPromptParts = ["Please analyze the following batch of translation cases:"];
+                if (context) userPromptParts.push(`\n**Additional Context:**\n${context}`);
                 batch.forEach(caseData => {
                     userPromptParts.push(`\n${'-'.repeat(30)}`);
                     userPromptParts.push(`CASE_ID_START:${caseData.id}\n`);
-                    userPromptParts.push(`**原文:**\n${caseData.sourceText}`);
-                    userPromptParts.push(`**待分析译文:**\n${caseData.translationText}`);
-                    userPromptParts.push(`**审校稿:**\n${caseData.revisionText}`);
+                    userPromptParts.push(`**Source Text:**\n${caseData.sourceText}`);
+                    userPromptParts.push(`**Draft Translation:**\n${caseData.translationText}`);
+                    userPromptParts.push(`**Revised Text:**\n${caseData.revisionText}`);
                     userPromptParts.push(`\nCASE_ID_END:${caseData.id}`);
                 });
                 userPromptParts.push(`\n${'-'.repeat(30)}`);
-                userPromptParts.push("\n请严格按照指示，返回一个以case_id为键的单一JSON对象。");
+                userPromptParts.push("\nPlease adhere strictly to the instructions and return a single JSON object keyed by case_id.");
                 
                 const user_prompt = userPromptParts.join('\n');
-
                 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
 
                 try {
@@ -288,30 +249,24 @@
                             generationConfig: { response_mime_type: "application/json" }
                         })
                     });
-
                     if (!response.ok) {
                         const errorBody = await response.text();
-                        throw new Error(`API请求失败，状态码: ${response.status}. 响应: ${errorBody}`);
+                        throw new Error(`API request failed with status ${response.status}. Response: ${errorBody}`);
                     }
-
                     const data = await response.json();
                     const responseText = data.candidates[0].content.parts[0].text;
                     const cleanedText = responseText.replace(/```json\s*|\s*```/g, '').trim();
                     return JSON.parse(cleanedText);
-
                 } catch (error) {
                     if (batch.length === 1) {
-                        log(`错误: 即使在批次大小为1时，案例 ${batch[0].id} 的分析依然失败。错误: ${error.message}`, 'error');
-                        return { [batch[0].id]: [] }; // Return empty diagnostic for the failed case
+                        log(`Error: Analysis failed for case ${batch[0].id} even with a batch size of 1. Error: ${error.message}`, 'error');
+                        return { [batch[0].id]: [] };
                     }
-
-                    log(`警告: 批次大小为 ${batch.length} 时分析失败。正在尝试将批次一分为二...`, 'warn');
-                    await new Promise(resolve => setTimeout(resolve, 2000)); // Wait before retrying
-                    
+                    log(`Warning: Analysis failed with batch size ${batch.length}. Splitting the batch in two and retrying...`, 'warn');
+                    await new Promise(resolve => setTimeout(resolve, 2000));
                     const mid = Math.ceil(batch.length / 2);
                     const firstHalfResults = await analyzeBatchRecursive(batch.slice(0, mid), context, modelName, apiKey);
                     const secondHalfResults = await analyzeBatchRecursive(batch.slice(mid), context, modelName, apiKey);
-                    
                     return { ...firstHalfResults, ...secondHalfResults };
                 }
             }
@@ -327,7 +282,7 @@
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-                log(`成功生成并下载文件: ${filename}`, 'success');
+                log(`Successfully generated and downloaded: ${filename}`, 'success');
             }
         });
     </script>
