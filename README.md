@@ -58,6 +58,8 @@ This tool is a rich, interactive visualizer for the data produced by the Generat
     
 -   **Interactive Diagnostic Identifiers:** Replaces a static count with interactive, color-coded dots in each case header. Hovering over an identifier instantly highlights the corresponding error in the text, providing a fluid way to locate issues, especially overlapping ones.
     
+-   **Reliable Error Highlighting:** To ensure every diagnosed issue can be visually highlighted, the system enforces a strict 'contiguity' rule in its AI instructions. The AI is required to define each `target_phrase` as a literal, uninterrupted segment of text from the draft. This prevents data-mismatch errors and guarantees that every item in the diagnostic report corresponds perfectly to a highlightable phrase in the analyzer.
+    
 -   **Focus Control:** A toggle allows the user to show or hide the "Revised Text" column, enabling focused comparison between the source and the draft translation while preserving the layout.
     
 -   **Cohesive Reading Experience:** Presents cases as a single, continuous document to facilitate in-context understanding of sequential texts.
