@@ -1,118 +1,90 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>交互式翻译诊断分析器 (v3)</title>
+    <title>Interactive Persona Translation Analyzer (v7)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Base styles */
         body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; font-family: 'Inter', sans-serif; }
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
         body.modal-open { overflow: hidden; }
-
-        /* Tooltip */
-        #global-tooltip {
-            position: fixed;
-            visibility: hidden;
-            opacity: 0;
-            transition: opacity 0.2s ease-in-out;
-            z-index: 1000;
-            max-width: 24rem; /* w-96 */
-            pointer-events: none;
-        }
-
-        /* Error highlighting ribbons */
+        #global-tooltip { position: fixed; visibility: hidden; opacity: 0; transition: opacity 0.2s ease-in-out; z-index: 1000; max-width: 24rem; pointer-events: none; }
         .ribbon { position: relative; cursor: pointer; padding: 1px 4px; border-radius: 4px; font-weight: 500; transition: all 0.2s ease-in-out; }
-        .ribbon-detective { background-color: rgba(59, 130, 246, 0.2); color: #1d4ed8; border-bottom: 2px dotted #3b82f6; }
-        .ribbon-designer { background-color: rgba(249, 115, 22, 0.2); color: #b45309; border-bottom: 2px dashed #f97316; }
-        .ribbon-artist { background-color: rgba(34, 197, 94, 0.2); color: #15803d; border-bottom: 2px dotted #22c55e; }
+        .ribbon-analyst { background-color: rgba(59, 130, 246, 0.2); color: #1d4ed8; border-bottom: 2px dotted #3b82f6; }
+        .ribbon-architect { background-color: rgba(249, 115, 22, 0.2); color: #b45309; border-bottom: 2px dashed #f97316; }
+        .ribbon-stylist { background-color: rgba(34, 197, 94, 0.2); color: #15803d; border-bottom: 2px dotted #22c55e; }
         .ribbon:hover { filter: brightness(1.1); }
-
-        /* Hide errors via toggle */
         .errors-hidden .ribbon { background-color: transparent !important; color: inherit !important; border-bottom-color: transparent !important; font-weight: normal; cursor: default; }
-        .errors-hidden .sentence-diagnostic { display: none; }
-
-        /* Three-column grid for case display */
         .table-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background-color: #e5e7eb; }
         .table-cell { background-color: white; padding: 1rem; line-height: 1.75; word-break: break-word; white-space: pre-wrap; }
         @media (max-width: 768px) {
             .table-grid { grid-template-columns: 1fr; }
             .table-header { font-weight: bold; background-color: #f9fafb; padding-top: 1.5rem; }
         }
-
-        /* Modal and Toggle styles */
         .modal-overlay { transition: opacity 0.3s ease; }
         .modal-content { transition: transform 0.3s ease; }
         .toggle-checkbox:checked + .toggle-label { background-color: #3b82f6; }
         .toggle-checkbox:checked + .toggle-label::after { transform: translateX(100%); }
-
-        /* File drop zone */
         .drop-zone.drag-over { border-color: #3b82f6; background-color: #eff6ff; }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans leading-relaxed">
 
     <div id="app" class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-        <!-- Sticky Header -->
         <header class="bg-white/80 backdrop-blur-md p-4 rounded-xl shadow-lg sticky top-4 z-20 border border-gray-200">
             <div class="flex flex-wrap justify-between items-center gap-4 mb-4">
-                <h1 class="text-xl md:text-2xl font-bold text-gray-900">交互式翻译诊断分析器</h1>
+                <h1 class="text-xl md:text-2xl font-bold text-gray-900">Interactive Persona Translation Analyzer</h1>
                 <div class="flex items-center space-x-4">
                     <div class="flex items-center">
-                        <span class="text-sm font-medium text-gray-700 mr-3">显示诊断</span>
+                        <span class="text-sm font-medium text-gray-700 mr-3">Show Diagnostics</span>
                         <label for="error-toggle" class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="error-toggle" class="sr-only toggle-checkbox">
+                            <input type="checkbox" id="error-toggle" class="sr-only toggle-checkbox" checked>
                             <div class="toggle-label w-11 h-6 bg-gray-300 rounded-full transition-colors duration-300 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-transform after:duration-300"></div>
                         </label>
                     </div>
-                    <label for="file-upload" class="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-blue-700 active:bg-blue-800 transition-all">加载案例 (JSON)</label>
+                    <label for="file-upload" class="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-blue-700 active:bg-blue-800 transition-all">Load Cases (JSON)</label>
                     <input type="file" id="file-upload" class="hidden" accept=".json">
                 </div>
             </div>
             <div id="legend" class="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-2 text-sm">
-                <div class="flex items-center"><span class="ribbon ribbon-detective cursor-pointer hover:brightness-110" data-modal-target="modal-detective">侦探</span><span id="stat-detective" class="ml-2 text-gray-600 font-medium"> (0)</span></div>
-                <div class="flex items-center"><span class="ribbon ribbon-designer cursor-pointer hover:brightness-110" data-modal-target="modal-designer">设计师</span><span id="stat-designer" class="ml-2 text-gray-600 font-medium"> (0)</span></div>
-                <div class="flex items-center"><span class="ribbon ribbon-artist cursor-pointer hover:brightness-110" data-modal-target="modal-artist">化妆师</span><span id="stat-artist" class="ml-2 text-gray-600 font-medium"> (0)</span></div>
+                <div class="flex items-center"><span class="ribbon ribbon-analyst cursor-pointer hover:brightness-110" data-modal-target="modal-analyst">The Analyst</span><span id="stat-analyst" class="ml-2 text-gray-600 font-medium">(0)</span></div>
+                <div class="flex items-center"><span class="ribbon ribbon-architect cursor-pointer hover:brightness-110" data-modal-target="modal-architect">The Architect</span><span id="stat-architect" class="ml-2 text-gray-600 font-medium">(0)</span></div>
+                <div class="flex items-center"><span class="ribbon ribbon-stylist cursor-pointer hover:brightness-110" data-modal-target="modal-stylist">The Stylist</span><span id="stat-stylist" class="ml-2 text-gray-600 font-medium">(0)</span></div>
             </div>
         </header>
 
-        <!-- Main Content Area -->
         <main id="main-content" class="mt-6">
-            <div id="cases-container" class="space-y-8">
+            <div id="cases-container">
                  <div id="drop-zone" class="drop-zone text-center text-gray-500 py-16 border-2 border-dashed border-gray-300 rounded-xl transition-colors cursor-pointer">
                     <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                    <p class="mt-4 text-lg font-medium">将 `cases.json` 文件拖拽至此</p>
-                    <p>或<strong class="text-blue-600">点击此处</strong>选择文件</p>
+                    <p class="mt-4 text-lg font-medium">Drag & drop your `cases.json` file here</p>
+                    <p>or <strong class="text-blue-600">click here</strong> to select a file</p>
                 </div>
             </div>
         </main>
     </div>
     
-    <!-- Global Tooltip & Modals -->
+    <!-- Modals -->
+    <div id="modal-analyst" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden opacity-0"><div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-md p-6 transform scale-95"><div class="flex items-start justify-between"><h3 class="text-xl font-bold text-blue-600">The Analyst</h3><button class="modal-close text-gray-500 hover:text-gray-800 text-2xl">&times;</button></div><p class="mt-4 text-gray-700"><strong>Core Mandate:</strong> To achieve a complete, nuanced, and context-aware understanding of the source text's meaning, intent, and subtext. The Analyst's loyalty is 100% to the source.</p><p class="mt-2 text-gray-600">Their primary failure mode is <strong>Knowledge Deficit</strong>, stemming from a lack of domain-specific knowledge or a failure to grasp subtle linguistic cues.</p></div></div>
+    <div id="modal-architect" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden opacity-0"><div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-md p-6 transform scale-95"><div class="flex items-start justify-between"><h3 class="text-xl font-bold text-orange-600">The Architect</h3><button class="modal-close text-gray-500 hover:text-gray-800 text-2xl">&times;</button></div><p class="mt-4 text-gray-700"><strong>Core Mandate:</strong> To deverbalize the source meaning and reconstruct it within a natural, logical, and idiomatic target-language structure, completely severing the umbilical cord of the source syntax.</p><p class="mt-2 text-gray-600">Their primary failure mode is <strong>Process Discipline Failure</strong>, a default to replicating the source structure out of inertia.</p></div></div>
+    <div id="modal-stylist" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden opacity-0"><div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-md p-6 transform scale-95"><div class="flex items-start justify-between"><h3 class="text-xl font-bold text-green-600">The Stylist</h3><button class="modal-close text-gray-500 hover:text-gray-800 text-2xl">&times;</button></div><p class="mt-4 text-gray-700"><strong>Core Mandate:</strong> To craft the final text with lexical precision, idiomatic grace, and stylistic appropriateness. The Stylist's loyalty is 100% to the target language and its reader.</p><p class="mt-2 text-gray-600">Their failure modes are a <strong>Resource Gap</strong> (lexical awkwardness) or <strong>Process Failure</strong> (a lapse in diligence and polish).</p></div></div>
+    
     <div id="global-tooltip" class="p-3 bg-gray-900 text-white text-sm rounded-lg shadow-xl border border-gray-700"></div>
-    <div id="modal-detective" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden opacity-0"><div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-md p-6 transform scale-95"><div class="flex items-start justify-between"><h3 class="text-xl font-bold text-blue-600">侦探 (The Detective)</h3><button class="modal-close text-gray-500 hover:text-gray-800 text-2xl">&times;</button></div><p class="mt-4 text-gray-700"><strong>核心使命：</strong>对原文的意义、意图及潜台词进行全面、细致且符合语境的勘查与理解。侦探的忠诚度100%服务于原文。</p><p class="mt-2 text-gray-600">其失职表现为【知识匮乏】，导致事实错误或因不自信而产生的生硬直译。</p></div></div>
-    <div id="modal-designer" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden opacity-0"><div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-md p-6 transform scale-95"><div class="flex items-start justify-between"><h3 class="text-xl font-bold text-orange-600">设计师 (The Designer)</h3><button class="modal-close text-gray-500 hover:text-gray-800 text-2xl">&times;</button></div><p class="mt-4 text-gray-700"><strong>核心使命：</strong>将原文的意义“去语化”，并在目标语言中重新设计出一个自然、合乎逻辑且地道的结构框架，彻底切断与原文句法的“脐带”。</p><p class="mt-2 text-gray-600">其失职表现为【流程失败】，导致典型的“翻译腔”。</p></div></div>
-    <div id="modal-artist" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden opacity-0"><div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-md p-6 transform scale-95"><div class="flex items-start justify-between"><h3 class="text-xl font-bold text-green-600">化妆师 (The Make-up Artist)</h3><button class="modal-close text-gray-500 hover:text-gray-800 text-2xl">&times;</button></div><p class="mt-4 text-gray-700"><strong>核心使命：</strong>以精准的词汇、地道的文采和得体的风格，完成终稿的创作。化妆师的忠诚度100%服务于目标语言及其读者。</p><p class="mt-2 text-gray-600">其失职可分为【资源匮乏】（词汇/句式储备不足）或【流程失败】（不够勤勉）。</p></div></div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // --- Element Selectors ---
             const fileUpload = document.getElementById('file-upload');
             const casesContainer = document.getElementById('cases-container');
             const mainContent = document.getElementById('main-content');
             const errorToggle = document.getElementById('error-toggle');
             const globalTooltip = document.getElementById('global-tooltip');
             const dropZone = document.getElementById('drop-zone');
-
-            // --- Data Store ---
             let diagnosisDataStore = {};
 
-            // --- Event Listeners ---
             fileUpload.addEventListener('change', (e) => handleFile(e.target.files[0]));
             errorToggle.addEventListener('change', () => mainContent.classList.toggle('errors-hidden', !errorToggle.checked));
             
-            // --- Drag and Drop Listeners ---
             dropZone.addEventListener('click', () => fileUpload.click());
             dropZone.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); dropZone.classList.add('drag-over'); });
             dropZone.addEventListener('dragleave', (e) => { e.preventDefault(); e.stopPropagation(); dropZone.classList.remove('drag-over'); });
@@ -123,20 +95,19 @@
                 handleFile(e.dataTransfer.files[0]);
             });
 
-            // --- Core Functions ---
             function handleFile(file) {
                 if (!file || !file.type.match('json.*')) {
-                    alert('请上传一个有效的JSON文件。'); // Note: Using alert as a simple notification
+                    alert('Please upload a valid JSON file.');
                     return;
                 }
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     try {
                         const data = JSON.parse(e.target.result);
-                        if (!data.cases) throw new Error("JSON文件中缺少 'cases' 数组。");
+                        if (!data.cases) throw new Error("The JSON file is missing the 'cases' array.");
                         renderCases(data.cases);
                     } catch (error) {
-                        casesContainer.innerHTML = `<div class="text-center text-red-600 p-8 bg-red-50 rounded-lg"><p class="text-lg font-bold">文件解析失败！</p><p class="mt-2">请确保您上传的是一个格式正确的JSON文件。</p><p class="text-sm mt-2 font-mono bg-red-100 inline-block px-2 py-1 rounded">错误: ${error.message}</p></div>`;
+                        casesContainer.innerHTML = `<div class="text-center text-red-600 p-8 bg-red-50 rounded-lg"><p class="text-lg font-bold">Failed to parse file!</p><p class="mt-2">Please ensure you are uploading a correctly formatted JSON file.</p><p class="text-sm mt-2 font-mono bg-red-100 inline-block px-2 py-1 rounded">Error: ${error.message}</p></div>`;
                     }
                 };
                 reader.readAsText(file);
@@ -144,97 +115,74 @@
 
             function renderCases(cases) {
                 let allCasesHtml = '';
-                diagnosisDataStore = {}; // Reset store
-                const stats = { Detective: 0, Designer: 0, Artist: 0 };
+                diagnosisDataStore = {};
+                const stats = { "The Analyst": 0, "The Architect": 0, "The Stylist": 0 };
+                
+                dropZone.style.display = 'none';
+                casesContainer.className = 'border border-gray-200 rounded-xl shadow-lg overflow-hidden';
 
                 cases.forEach((caseData, index) => {
-                    const { html, sentenceDiagnostics, mismatchCount } = annotateTranslation(caseData);
+                    const { html, mismatchCount } = annotateTranslation(caseData);
                     
                     (caseData.diagnostics || []).forEach(diag => {
-                        const persona = diag.persona || "未知";
-                        if (persona.includes("侦探")) stats.Detective++;
-                        if (persona.includes("设计师")) stats.Designer++;
-                        if (persona.includes("化妆师")) stats.Artist++;
+                        if (stats.hasOwnProperty(diag.persona)) {
+                            stats[diag.persona]++;
+                        }
                     });
-
-                    // This block is now redundant as sentence diagnostics are handled inline, but it's harmless.
-                    let sentenceDiagnosticsHtml = sentenceDiagnostics.map(diag => {
-                        const ribbonClass = getRibbonClass(diag.persona);
-                        return `
-                            <div class="sentence-diagnostic mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                                <p class="font-semibold text-gray-800"><span class="ribbon ${ribbonClass}" data-tooltip-id="${diag.id}">${diag.persona}诊断 (句子层面)</span></p>
-                                <p class="text-gray-600 mt-1 text-sm">${escapeHtml(diag.explanation)}</p>
-                            </div>
-                        `;
-                    }).join('');
                     
-                    const mismatchHtml = mismatchCount > 0 ? `<span class="text-xs font-normal text-amber-600 ml-auto" title="部分诊断的 'target_phrase' 未能在译文中精确匹配，因此未高亮显示。">${mismatchCount} 项未匹配</span>` : '';
+                    const mismatchHtml = mismatchCount > 0 ? `<span class="text-xs font-normal text-amber-600 ml-auto" title="${mismatchCount} diagnostics had a 'target_phrase' that could not be precisely matched in the draft text and are therefore not highlighted.">${mismatchCount} items not matched</span>` : '';
 
                     allCasesHtml += `
-                        <div class="case-block bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
+                        <div class="case-block bg-white border-b border-gray-200 last:border-b-0">
                             <div class="p-4 border-b border-gray-200">
                                 <h2 class="text-xl font-bold text-gray-800 flex items-center">
-                                    <span>案例 ${index + 1}</span>
-                                    <span class="text-sm font-normal text-gray-500 bg-gray-100 px-3 py-1 rounded-full ml-4">${caseData.diagnostics?.length || 0} 项诊断</span>
+                                    <span>Case ${index + 1}</span>
+                                    <span class="text-sm font-normal text-gray-500 bg-gray-100 px-3 py-1 rounded-full ml-4">${caseData.diagnostics?.length || 0} diagnostics</span>
                                     ${mismatchHtml}
                                 </h2>
                             </div>
                             <div class="table-grid">
-                                <div class="table-cell font-bold text-lg bg-gray-50 text-gray-900 hidden md:block">原文</div>
-                                <div class="table-cell font-bold text-lg bg-gray-50 text-gray-900 hidden md:block">译文初稿</div>
-                                <div class="table-cell font-bold text-lg bg-gray-50 text-gray-900 hidden md:block">审校稿</div>
+                                <div class="table-cell font-bold text-lg bg-gray-50 text-gray-900 hidden md:block">Source Text</div>
+                                <div class="table-cell font-bold text-lg bg-gray-50 text-gray-900 hidden md:block">Draft Translation</div>
+                                <div class="table-cell font-bold text-lg bg-gray-50 text-gray-900 hidden md:block">Revised Text</div>
                                 
-                                <div class="table-cell table-header md:hidden">原文</div>
+                                <div class="table-cell table-header md:hidden">Source Text</div>
                                 <div class="table-cell">${escapeHtml(caseData.sourceText || '')}</div>
                                 
-                                <div class="table-cell table-header md:hidden">译文初稿</div>
-                                <div class="table-cell">${html}${sentenceDiagnosticsHtml}</div>
+                                <div class="table-cell table-header md:hidden">Draft Translation</div>
+                                <div class="table-cell">${html}</div>
 
-                                <div class="table-cell table-header md:hidden">审校稿</div>
+                                <div class="table-cell table-header md:hidden">Revised Text</div>
                                 <div class="table-cell">${escapeHtml(caseData.revisionText || '')}</div>
                             </div>
                         </div>`;
                 });
                 
-                casesContainer.innerHTML = allCasesHtml || `<div class="text-center text-gray-500 py-16"><p class="text-lg">未找到任何有效案例。</p></div>`;
+                casesContainer.innerHTML = allCasesHtml || `<div class="text-center text-gray-500 py-16"><p class="text-lg">No valid cases found.</p></div>`;
                 updateStats(stats);
                 setupTooltipListeners();
-                
-                errorToggle.checked = true;
                 mainContent.classList.remove('errors-hidden');
             }
 
-            /**
-             * [REVISED]
-             * Annotates the translation text. Phrase-level diagnostics are highlighted inline.
-             * Sentence-level diagnostics now wrap the entire text block in a highlight,
-             * and their tooltips are consolidated.
-             */
             function annotateTranslation(caseData) {
                 const text = caseData.translationText || '';
                 const diagnostics = caseData.diagnostics || [];
                 if (!text || diagnostics.length === 0) {
-                    return { html: escapeHtml(text), sentenceDiagnostics: [], mismatchCount: 0 };
+                    return { html: escapeHtml(text), mismatchCount: 0 };
                 }
 
-                // 1. Assign unique IDs and store all diagnostics for later lookup
                 diagnostics.forEach((diag, index) => {
-                    const uniqueId = `diag-${caseData.id || crypto.randomUUID()}-${index}`;
-                    diag.id = uniqueId;
-                    diagnosisDataStore[uniqueId] = diag;
+                    diag.id = `diag-${caseData.id || crypto.randomUUID()}-${index}`;
+                    diagnosisDataStore[diag.id] = diag;
                 });
-                
-                // 2. Separate into sentence-level and phrase-level
-                const sentenceDiagnostics = diagnostics.filter(d => d.target_phrase === text);
-                const phraseAnnotations = diagnostics.filter(d => d.target_phrase && d.target_phrase !== text);
 
-                // 3. Build the inner HTML from phrase-level annotations
                 let htmlParts = [];
                 let lastIndex = 0;
-                let appliedPhraseAnnos = new Set();
+                let appliedAnnos = new Set();
 
-                const flatAnnotations = phraseAnnotations.flatMap(anno => {
+                const flatAnnotations = diagnostics.flatMap(anno => {
                     const occurrences = [];
+                    if (!anno.target_phrase) return [];
                     let fromIndex = 0;
                     while ((fromIndex = text.indexOf(anno.target_phrase, fromIndex)) !== -1) {
                         occurrences.push({ ...anno, startIndex: fromIndex, endIndex: fromIndex + anno.target_phrase.length });
@@ -253,7 +201,7 @@
                         const spanWrapper = `<span class="ribbon ${ribbonClass}" data-tooltip-id="${anno.id}">${phraseHtml}</span>`;
                         htmlParts.push(spanWrapper);
                         lastIndex = anno.endIndex;
-                        appliedPhraseAnnos.add(anno.id);
+                        appliedAnnos.add(anno.id);
                     }
                 });
 
@@ -261,22 +209,9 @@
                     htmlParts.push(escapeHtml(text.substring(lastIndex)));
                 }
                 
-                let finalHtml = htmlParts.join('');
-                
-                // 4. If there are sentence-level diagnostics, wrap the entire HTML
-                if (sentenceDiagnostics.length > 0) {
-                    const primaryPersona = sentenceDiagnostics[0].persona; // Use first one for color
-                    const ribbonClass = getRibbonClass(primaryPersona);
-                    const allSentenceDiagIds = sentenceDiagnostics.map(d => d.id).join(',');
-                    finalHtml = `<span class="ribbon ${ribbonClass}" data-tooltip-id="${allSentenceDiagIds}">${finalHtml}</span>`;
-                }
-
-                const mismatchCount = phraseAnnotations.length - appliedPhraseAnnos.size;
-
-                // Return final HTML and an EMPTY sentenceDiagnostics array to prevent the old rendering path.
-                return { html: finalHtml, sentenceDiagnostics: [], mismatchCount };
+                const mismatchCount = diagnostics.length - appliedAnnos.size;
+                return { html: htmlParts.join(''), mismatchCount };
             }
-
 
             function setupTooltipListeners() {
                 document.querySelectorAll('.ribbon[data-tooltip-id]').forEach(ribbon => {
@@ -286,35 +221,21 @@
                 });
             }
 
-            /**
-             * [REVISED]
-             * Shows a tooltip. Now handles comma-separated IDs to display multiple
-             * diagnostics in a single tooltip for sentence-level errors.
-             */
             function showTooltip(event) {
                 if (mainContent.classList.contains('errors-hidden')) return;
                 const ribbon = event.target;
-                const tooltipIds = ribbon.getAttribute('data-tooltip-id').split(',');
-                
-                let finalTooltipHtml = '';
+                const tooltipId = ribbon.getAttribute('data-tooltip-id');
+                const diagData = diagnosisDataStore[tooltipId];
+                if (!diagData) return;
 
-                tooltipIds.forEach(tooltipId => {
-                    const diagData = diagnosisDataStore[tooltipId];
-                    if (!diagData) return;
-
-                    finalTooltipHtml += `
-                        <div class="p-2 border-b border-gray-700 last:border-b-0">
-                            <div class="font-bold text-base mb-2 flex items-center">
-                                <span class="mr-2 px-2 py-0.5 rounded-md text-sm text-white ${getPersonaBgClass(diagData.persona)}">${diagData.persona}</span>
-                                <span class="text-gray-300">${escapeHtml(diagData.cause)}</span>
-                            </div>
-                            <p class="text-gray-200">${escapeHtml(diagData.explanation)}</p>
-                        </div>`;
-                });
-
-                if (!finalTooltipHtml) return;
-
-                globalTooltip.innerHTML = finalTooltipHtml;
+                globalTooltip.innerHTML = `
+                    <div class="p-2">
+                        <div class="font-bold text-base mb-2 flex items-center">
+                            <span class="mr-2 px-2 py-0.5 rounded-md text-sm text-white ${getPersonaBgClass(diagData.persona)}">${escapeHtml(diagData.persona)}</span>
+                            <span class="text-gray-300">${escapeHtml(diagData.cause)}</span>
+                        </div>
+                        <p class="text-gray-200">${escapeHtml(diagData.explanation)}</p>
+                    </div>`;
                 globalTooltip.style.visibility = 'visible';
                 globalTooltip.style.opacity = '1';
                 positionTooltip(event);
@@ -324,13 +245,11 @@
                 const tooltip = globalTooltip;
                 let top = event.clientY - tooltip.offsetHeight - 10;
                 let left = event.clientX - (tooltip.offsetWidth / 2);
-
                 if (top < 10) top = event.clientY + 20;
                 if (left < 10) left = 10;
                 if (left + tooltip.offsetWidth > window.innerWidth) {
                     left = window.innerWidth - tooltip.offsetWidth - 10;
                 }
-                
                 tooltip.style.top = `${top}px`;
                 tooltip.style.left = `${left}px`;
             }
@@ -338,32 +257,60 @@
             function hideTooltip() { globalTooltip.style.visibility = 'hidden'; globalTooltip.style.opacity = '0'; }
             
             function updateStats(stats) {
-                document.getElementById('stat-detective').textContent = ` (${stats.Detective})`;
-                document.getElementById('stat-designer').textContent = ` (${stats.Designer})`;
-                document.getElementById('stat-artist').textContent = ` (${stats.Artist})`;
+                document.getElementById('stat-analyst').textContent = ` (${stats["The Analyst"]})`;
+                document.getElementById('stat-architect').textContent = ` (${stats["The Architect"]})`;
+                document.getElementById('stat-stylist').textContent = ` (${stats["The Stylist"]})`;
             }
+
             function getRibbonClass(persona) {
-                if (persona.includes("侦探")) return "ribbon-detective";
-                if (persona.includes("设计师")) return "ribbon-designer";
-                if (persona.includes("化妆师")) return "ribbon-artist";
+                if (persona === "The Analyst") return "ribbon-analyst";
+                if (persona === "The Architect") return "ribbon-architect";
+                if (persona === "The Stylist") return "ribbon-stylist";
                 return "";
             }
+
             function getPersonaBgClass(persona) {
-                if (persona.includes("侦探")) return "bg-blue-600";
-                if (persona.includes("设计师")) return "bg-orange-600";
-                if (persona.includes("化妆师")) return "bg-green-600";
+                if (persona === "The Analyst") return "bg-blue-600";
+                if (persona === "The Architect") return "bg-orange-600";
+                if (persona === "The Stylist") return "bg-green-600";
                 return "bg-gray-600";
             }
+
             function escapeHtml(text) {
                 if (typeof text !== 'string') return '';
                 return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
             }
 
-            // --- Modal Logic ---
-            document.querySelectorAll('[data-modal-target]').forEach(trigger => { trigger.addEventListener('click', () => openModal(document.getElementById(trigger.getAttribute('data-modal-target')))); });
-            document.querySelectorAll('.modal-close, .modal-overlay').forEach(closer => { closer.addEventListener('click', (event) => { if (event.target === closer) closeModal(closer.closest('.modal-overlay')); }); });
-            function openModal(modal) { if (!modal) return; document.body.classList.add('modal-open'); modal.classList.remove('hidden'); setTimeout(() => { modal.classList.remove('opacity-0'); modal.querySelector('.modal-content').classList.remove('scale-95'); }, 10); }
-            function closeModal(modal) { if (!modal) return; document.body.classList.remove('modal-open'); modal.classList.add('opacity-0'); modal.querySelector('.modal-content').classList.add('scale-95'); setTimeout(() => { modal.classList.add('hidden'); }, 300); }
+            document.querySelectorAll('[data-modal-target]').forEach(trigger => {
+                trigger.addEventListener('click', () => openModal(document.getElementById(trigger.getAttribute('data-modal-target'))));
+            });
+            document.querySelectorAll('.modal-close, .modal-overlay').forEach(closer => {
+                closer.addEventListener('click', (event) => {
+                    if (event.target === closer) {
+                        closeModal(closer.closest('.modal-overlay'));
+                    }
+                });
+            });
+
+            function openModal(modal) {
+                if (!modal) return;
+                document.body.classList.add('modal-open');
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.classList.remove('opacity-0');
+                    modal.querySelector('.modal-content').classList.remove('scale-95');
+                }, 10);
+            }
+
+            function closeModal(modal) {
+                if (!modal) return;
+                document.body.classList.remove('modal-open');
+                modal.classList.add('opacity-0');
+                modal.querySelector('.modal-content').classList.add('scale-95');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 300);
+            }
         });
     </script>
 </body>
