@@ -17,11 +17,10 @@
         .ribbon:hover { filter: brightness(1.1); }
         .errors-hidden .ribbon { background-color: transparent !important; color: inherit !important; border-bottom-color: transparent !important; font-weight: normal; cursor: default; }
         
-        /* New rule to hide revision text while keeping layout */
         .revision-hidden .revision-cell {
             color: transparent !important;
             user-select: none;
-            background-color: #f9fafb !important; /* Use a light gray to indicate the area is present but hidden */
+            background-color: #f9fafb !important;
         }
 
         .table-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background-color: #e5e7eb; }
@@ -82,7 +81,6 @@
         </main>
     </div>
     
-    <!-- Modals -->
     <div id="modal-analyst" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden opacity-0"><div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-md p-6 transform scale-95"><div class="flex items-start justify-between"><h3 class="text-xl font-bold text-blue-600">The Analyst</h3><button class="modal-close text-gray-500 hover:text-gray-800 text-2xl">&times;</button></div><p class="mt-4 text-gray-700"><strong>Core Mandate:</strong> To achieve a complete, nuanced, and context-aware understanding of the source text's meaning, intent, and subtext. The Analyst's loyalty is 100% to the source.</p><p class="mt-2 text-gray-600">Their primary failure mode is <strong>Knowledge Deficit</strong>, stemming from a lack of domain-specific knowledge or a failure to grasp subtle linguistic cues.</p></div></div>
     <div id="modal-architect" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden opacity-0"><div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-md p-6 transform scale-95"><div class="flex items-start justify-between"><h3 class="text-xl font-bold text-orange-600">The Architect</h3><button class="modal-close text-gray-500 hover:text-gray-800 text-2xl">&times;</button></div><p class="mt-4 text-gray-700"><strong>Core Mandate:</strong> To deverbalize the source meaning and reconstruct it within a natural, logical, and idiomatic target-language structure, completely severing the umbilical cord of the source syntax.</p><p class="mt-2 text-gray-600">Their primary failure mode is <strong>Process Discipline Failure</strong>, a default to replicating the source structure out of inertia.</p></div></div>
     <div id="modal-stylist" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden opacity-0"><div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-md p-6 transform scale-95"><div class="flex items-start justify-between"><h3 class="text-xl font-bold text-green-600">The Stylist</h3><button class="modal-close text-gray-500 hover:text-gray-800 text-2xl">&times;</button></div><p class="mt-4 text-gray-700"><strong>Core Mandate:</strong> To craft the final text with lexical precision, idiomatic grace, and stylistic appropriateness. The Stylist's loyalty is 100% to the target language and its reader.</p><p class="mt-2 text-gray-600">Their failure modes are a <strong>Resource Gap</strong> (lexical awkwardness) or <strong>Process Failure</strong> (a lapse in diligence and polish).</p></div></div>
@@ -95,14 +93,14 @@
             const casesContainer = document.getElementById('cases-container');
             const mainContent = document.getElementById('main-content');
             const errorToggle = document.getElementById('error-toggle');
-            const revisionToggle = document.getElementById('revision-toggle'); // New toggle
+            const revisionToggle = document.getElementById('revision-toggle');
             const globalTooltip = document.getElementById('global-tooltip');
             const dropZone = document.getElementById('drop-zone');
             let diagnosisDataStore = {};
 
             fileUpload.addEventListener('change', (e) => handleFile(e.target.files[0]));
             errorToggle.addEventListener('change', () => mainContent.classList.toggle('errors-hidden', !errorToggle.checked));
-            revisionToggle.addEventListener('change', () => mainContent.classList.toggle('revision-hidden', !revisionToggle.checked)); // New listener
+            revisionToggle.addEventListener('change', () => mainContent.classList.toggle('revision-hidden', !revisionToggle.checked));
             
             dropZone.addEventListener('click', () => fileUpload.click());
             dropZone.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); dropZone.classList.add('drag-over'); });
@@ -181,13 +179,17 @@
                 updateStats(stats);
                 setupTooltipListeners();
                 
-                // Set initial visibility states
                 mainContent.classList.remove('errors-hidden');
                 errorToggle.checked = true;
                 mainContent.classList.add('revision-hidden');
                 revisionToggle.checked = false;
             }
 
+            /**
+             * [REVISED]
+             * Annotates the translation text using a robust segmentation algorithm.
+             * This version correctly handles nested and overlapping annotations.
+             */
             function annotateTranslation(caseData) {
                 const text = caseData.translationText || '';
                 const diagnostics = caseData.diagnostics || [];
@@ -195,45 +197,46 @@
                     return { html: escapeHtml(text), mismatchCount: 0 };
                 }
 
+                let appliedAnnosCount = 0;
                 diagnostics.forEach((diag, index) => {
                     diag.id = `diag-${caseData.id || crypto.randomUUID()}-${index}`;
                     diagnosisDataStore[diag.id] = diag;
                 });
 
-                let htmlParts = [];
-                let lastIndex = 0;
-                let appliedAnnos = new Set();
+                const annotations = diagnostics.map(anno => {
+                    if (!anno.target_phrase) return null;
+                    const startIndex = text.indexOf(anno.target_phrase);
+                    if (startIndex === -1) return null;
+                    appliedAnnosCount++;
+                    return { ...anno, startIndex, endIndex: startIndex + anno.target_phrase.length };
+                }).filter(Boolean);
 
-                const flatAnnotations = diagnostics.flatMap(anno => {
-                    const occurrences = [];
-                    if (!anno.target_phrase) return [];
-                    let fromIndex = 0;
-                    while ((fromIndex = text.indexOf(anno.target_phrase, fromIndex)) !== -1) {
-                        occurrences.push({ ...anno, startIndex: fromIndex, endIndex: fromIndex + anno.target_phrase.length });
-                        fromIndex++;
-                    }
-                    return occurrences;
-                }).sort((a, b) => a.startIndex - b.startIndex);
-
-                flatAnnotations.forEach(anno => {
-                    if (anno.startIndex > lastIndex) {
-                        htmlParts.push(escapeHtml(text.substring(lastIndex, anno.startIndex)));
-                    }
-                    if (anno.startIndex >= lastIndex) {
-                        const ribbonClass = getRibbonClass(anno.persona);
-                        const phraseHtml = escapeHtml(anno.target_phrase);
-                        const spanWrapper = `<span class="ribbon ${ribbonClass}" data-tooltip-id="${anno.id}">${phraseHtml}</span>`;
-                        htmlParts.push(spanWrapper);
-                        lastIndex = anno.endIndex;
-                        appliedAnnos.add(anno.id);
-                    }
+                const mismatchCount = diagnostics.length - appliedAnnosCount;
+                const points = new Set([0, text.length]);
+                annotations.forEach(anno => {
+                    points.add(anno.startIndex);
+                    points.add(anno.endIndex);
                 });
+                const sortedPoints = Array.from(points).sort((a, b) => a - b);
 
-                if (lastIndex < text.length) {
-                    htmlParts.push(escapeHtml(text.substring(lastIndex)));
+                let htmlParts = [];
+                for (let i = 0; i < sortedPoints.length - 1; i++) {
+                    const start = sortedPoints[i];
+                    const end = sortedPoints[i + 1];
+                    if (start >= end) continue;
+
+                    let segmentHtml = escapeHtml(text.substring(start, end));
+                    const activeAnnotations = annotations
+                        .filter(anno => anno.startIndex <= start && anno.endIndex >= end)
+                        .sort((a, b) => (b.endIndex - b.startIndex) - (a.endIndex - a.startIndex));
+                    
+                    activeAnnotations.forEach(anno => {
+                        const ribbonClass = getRibbonClass(anno.persona);
+                        segmentHtml = `<span class="ribbon ${ribbonClass}" data-tooltip-id="${anno.id}">${segmentHtml}</span>`;
+                    });
+                    htmlParts.push(segmentHtml);
                 }
-                
-                const mismatchCount = diagnostics.length - appliedAnnos.size;
+
                 return { html: htmlParts.join(''), mismatchCount };
             }
 
