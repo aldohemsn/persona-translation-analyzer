@@ -9,7 +9,7 @@
   font-family: 'Inter'; /* We use 'Inter' to match the existing CSS */
   font-style: normal;
   font-weight: 400;
-  src: url('./fonts/noto-sans-sc-v38-chinese-simplified-regular.woff2') format('woff2');
+  src: url('./fonts/noto-sans-sc-v38-chinese-simplified_latin-regular.woff2') format('woff2');
 }
 
 /* Medium (500) Weight */
@@ -18,7 +18,7 @@
   font-family: 'Inter';
   font-style: normal;
   font-weight: 500;
-  src: url('./fonts/noto-sans-sc-v38-chinese-simplified-500.woff2') format('woff2');
+  src: url('./fonts/noto-sans-sc-v38-chinese-simplified_latin-500.woff2') format('woff2');
 }
 
 /* Bold (700) Weight */
@@ -27,7 +27,7 @@
   font-family: 'Inter';
   font-style: normal;
   font-weight: 700;
-  src: url('./fonts/noto-sans-sc-v38-chinese-simplified-700.woff2') format('woff2');
+  src: url('./fonts/noto-sans-sc-v38-chinese-simplified_latin-700.woff2') format('woff2');
 }
 
 /* Now, define the SAME 'Inter' font family again, but point to the Latin font files. */

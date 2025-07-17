@@ -6,7 +6,7 @@
     <title>Interactive Persona Translation Analyzer (v10)</title>
     <!-- Local CSS and Font files for offline use -->
     <link href="fonts.css" rel="stylesheet">
-    <link href="styles.css" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* General Styling */
         body {
@@ -38,7 +38,8 @@
             transition: all 0.2s ease-in-out;
         }
         .ribbon-analyst { background-color: rgba(59, 130, 246, 0.2); color: #1d4ed8; border-bottom: 2px dotted #3b82f6; }
-        .ribbon-architect { background-color: rgba(249, 115, 22, 0.2); color: #b45309; border-bottom: 2px dashed #f97316; }
+        /* --- MODIFIED: Changed Architect ribbon colors from orange to a more distinct amber --- */
+        .ribbon-architect { background-color: rgba(245, 158, 11, 0.2); color: #b45309; border-bottom: 2px dashed #f59e0b; }
         .ribbon-stylist { background-color: rgba(34, 197, 94, 0.2); color: #15803d; border-bottom: 2px dotted #22c55e; }
         .ribbon:hover { filter: brightness(1.1); }
         .errors-hidden .ribbon {
@@ -156,7 +157,6 @@
 <body class="bg-gray-50 text-gray-800 leading-relaxed">
 
     <div id="app" class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-        <!-- The header is now fully opaque with bg-white instead of bg-white/80 -->
         <header class="bg-white p-4 rounded-xl shadow-lg sticky top-4 z-20 border border-gray-200">
             <div class="flex flex-wrap justify-between items-center gap-4 mb-4">
                 <h1 class="text-xl md:text-2xl font-bold text-gray-900">Persona Translation Analyzer</h1>
@@ -213,7 +213,8 @@
     <div id="modal-architect" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden opacity-0" role="dialog" aria-modal="true" aria-labelledby="modal-architect-title">
         <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-md p-6 transform scale-95">
             <div class="flex items-start justify-between">
-                <h3 id="modal-architect-title" class="text-xl font-bold text-orange-600 flex items-center">
+                <!-- --- MODIFIED: Changed Architect modal title color from text-orange-600 to text-amber-600 --- -->
+                <h3 id="modal-architect-title" class="text-xl font-bold text-amber-600 flex items-center">
                     <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.5 6.5a2.5 2.5 0 115 0 2.5 2.5 0 01-5 0zm12 11a2.5 2.5 0 115 0 2.5 2.5 0 01-5 0zM3.5 17.5a2.5 2.5 0 105 0 2.5 2.5 0 00-5 0z"></path></svg>
                     The Architect
                 </h3>
@@ -599,7 +600,8 @@
 
             function getPersonaBgClass(persona) {
                 if (persona === "The Analyst") return "bg-blue-600";
-                if (persona === "The Architect") return "bg-orange-600";
+                // --- MODIFIED: Changed Architect background class from bg-orange-600 to bg-amber-500 ---
+                if (persona === "The Architect") return "bg-amber-500";
                 if (persona === "The Stylist") return "bg-green-600";
                 return "bg-gray-600";
             }
