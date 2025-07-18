@@ -6,6 +6,7 @@
     <title>Persona Translation Analyzer (Offline)</title>
     <link rel="stylesheet" href="./assets/css/tailwind.min.css">
     <link rel="stylesheet" href="./assets/css/fonts.css">
+
     <style>
         /*
          * styles.css
@@ -180,6 +181,11 @@
             border-color: var(--accent-analyst);
             background-color: #eff6ff; /* blue-50 */
         }
+        
+        /* --- Collapsible Header --- */
+        header.is-collapsed #header-toggle-icon {
+            transform: rotate(-180deg);
+        }
 
         /* --- Utility --- */
         .scroll-margin {
@@ -199,26 +205,35 @@
 
     <div id="app" class="app-grid p-4 sm:p-6">
         
-        <header style="grid-area: header;" class="bg-white/80 backdrop-blur-lg border border-[var(--border-color)] rounded-xl shadow-sm p-4 sticky top-4 z-20">
+        <header id="main-header" style="grid-area: header;" class="bg-white/80 backdrop-blur-lg border border-[var(--border-color)] rounded-xl shadow-sm p-4 sticky top-4 z-20 transition-default">
             <div class="flex flex-wrap justify-between items-center gap-4">
-                <h1 class="text-xl font-bold text-slate-800">Persona Translation Analyzer <span class="font-normal text-lg text-slate-400">v2.2.1-prod</span></h1>
+                <div class="flex items-center gap-3">
+                    <h1 class="text-xl font-bold text-slate-800">Persona Translation Analyzer <span class="font-normal text-lg text-slate-400">v2.2.1-prod</span></h1>
+                    <button id="header-toggle-btn" class="flex items-center justify-center w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition-default" title="Toggle Filters Panel">
+                        <svg id="header-toggle-icon" class="w-5 h-5 transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </button>
+                </div>
                 <div id="controls" class="flex items-center gap-2">
                     <button id="paste-json-btn" class="px-3 py-1.5 text-sm font-semibold bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-default">Paste JSON</button>
                     <label for="file-upload" class="cursor-pointer px-3 py-1.5 text-sm font-semibold bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-default">Load File</label>
                     <input type="file" id="file-upload" class="hidden" accept=".json">
                 </div>
             </div>
-            <div id="stats-dashboard" class="mt-4 pt-4 border-t border-[var(--border-color)] grid grid-cols-1 sm:grid-cols-4 gap-4 hidden">
-                 <h3 class="text-sm font-semibold text-slate-500 self-center hidden sm:block">FILTERS:</h3>
-                 </div>
+            <div id="collapsible-header" class="overflow-hidden transition-all duration-300 ease-in-out">
+                <div id="stats-dashboard" class="mt-4 pt-4 border-t border-[var(--border-color)] grid grid-cols-1 sm:grid-cols-4 gap-4 hidden">
+                     <h3 class="text-sm font-semibold text-slate-500 self-center hidden sm:block">FILTERS:</h3>
+                </div>
+            </div>
         </header>
 
         <main id="cases-list" style="grid-area: main;" class="pr-2 -mr-2">
-            </main>
+        </main>
 
         <aside id="critique-panel" style="grid-area: aside;" class="bg-white border border-[var(--border-color)] rounded-xl shadow-sm flex flex-col transition-default">
             <div id="critique-content" class="h-full p-5">
-                </div>
+            </div>
         </aside>
 
     </div>
@@ -250,11 +265,15 @@
             activeDiagnosticId: null,
             activeFilter: null,
             toastTimeout: null,
+            isHeaderCollapsed: false,
         };
 
         // --- DOM ELEMENT CACHE ---
         const dom = {
             app: document.getElementById('app'),
+            header: document.getElementById('main-header'),
+            headerToggleBtn: document.getElementById('header-toggle-btn'),
+            collapsibleHeader: document.getElementById('collapsible-header'),
             casesList: document.getElementById('cases-list'),
             critiquePanel: document.getElementById('critique-panel'),
             critiqueContent: document.getElementById('critique-content'),
@@ -282,6 +301,7 @@
 
         function setupEventListeners() {
             dom.fileUpload.addEventListener('change', e => handleFile(e.target.files[0]));
+            dom.headerToggleBtn.addEventListener('click', handleHeaderToggle);
             
             // Modal listeners
             dom.pasteJsonBtn.addEventListener('click', () => toggleModal(true));
@@ -316,6 +336,7 @@
                 </div>`;
             dom.critiqueContent.innerHTML = `<div class="h-full flex items-center justify-center text-center text-slate-400"><p>Critique panel is waiting for data...</p></div>`;
             dom.statsDashboard.classList.add('hidden');
+            dom.collapsibleHeader.style.maxHeight = '0px';
         }
         
         function renderAll() {
@@ -390,6 +411,7 @@
         function renderStatsDashboard() {
             if (state.cases.length === 0) {
                 dom.statsDashboard.classList.add('hidden');
+                dom.collapsibleHeader.style.maxHeight = '0px';
                 return;
             }
             const stats = { "The Analyst": 0, "The Architect": 0, "The Stylist": 0 };
@@ -405,6 +427,11 @@
             }).join('');
             dom.statsDashboard.innerHTML = `<h3 class="text-sm font-semibold text-slate-500 self-center hidden sm:block">FILTERS:</h3>` + statsHtml;
             dom.statsDashboard.classList.remove('hidden');
+
+            // Set max-height for animation
+            if (!state.isHeaderCollapsed) {
+                dom.collapsibleHeader.style.maxHeight = dom.collapsibleHeader.scrollHeight + "px";
+            }
         }
 
         function updateActiveStates() {
@@ -452,6 +479,16 @@
             const jsonString = dom.pasteModal.textArea.value;
             if (processJsonData(jsonString)) {
                 toggleModal(false);
+            }
+        }
+
+        function handleHeaderToggle() {
+            state.isHeaderCollapsed = !state.isHeaderCollapsed;
+            dom.header.classList.toggle('is-collapsed', state.isHeaderCollapsed);
+            if (state.isHeaderCollapsed) {
+                dom.collapsibleHeader.style.maxHeight = '0px';
+            } else {
+                dom.collapsibleHeader.style.maxHeight = dom.collapsibleHeader.scrollHeight + "px";
             }
         }
 
@@ -547,6 +584,7 @@
                 state.activeCaseId = data.cases.length > 0 ? data.cases[0].id : null;
                 state.activeDiagnosticId = null;
                 state.activeFilter = null;
+                state.isHeaderCollapsed = false; // Reset collapse state on new file
 
                 state.cases.forEach(caseData => {
                     (caseData.diagnostics || []).forEach((diag, index) => {
@@ -557,6 +595,7 @@
                 });
 
                 renderAll();
+                dom.header.classList.remove('is-collapsed');
                 showToast(`Successfully loaded ${state.cases.length} cases.`);
                 return true;
             } catch (error) {
@@ -637,26 +676,11 @@
 
         function renderMarkdown(text) {
             if (typeof text !== 'string') return '';
-            // First, escape any potentially malicious HTML from the input text.
-            // This creates a safe baseline.
             let html = escapeHtml(text);
-
-            // The order of replacement is crucial for correct parsing.
-            // We process from most specific (***) to least specific (*).
-            
-            // 1. Code blocks (`...`): Processed first to prevent any markdown parsing within them.
-            // The content ($1) is already safely escaped from the initial escapeHtml call.
             html = html.replace(/`(.*?)`/g, '<code class="font-code text-sm bg-slate-200/50 text-slate-800 px-1 py-0.5 rounded">$1</code>');
-            
-            // 2. Bold and Italic (***...***)
             html = html.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
-            
-            // 3. Bold (**...**)
             html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            
-            // 4. Italic (*...*)
             html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
-
             return html;
         }
 
