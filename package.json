@@ -1,0 +1,18 @@
+{
+  "name": "persona-translation-analyzer",
+  "version": "1.0.0",
+  "description": "A sophisticated, two-part system for AI-powered translation quality assessment, moving beyond literal accuracy to diagnose issues of style, structure, and nuance.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  },
+  "dependencies": {
+    "update-browserslist-db": "^1.1.3"
+  }
+}
