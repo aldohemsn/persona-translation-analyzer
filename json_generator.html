@@ -3,33 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Persona Translation Diagnostic JSON Generator (v8)</title>
+    <title>Persona Translation Diagnostic JSON Generator (v10.1)</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Using local fonts to match analyzer.html -->
+    <link href="fonts.css" rel="stylesheet">
     <style>
-        body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; font-family: 'Inter', sans-serif; }
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+        body { 
+            -webkit-font-smoothing: antialiased; 
+            -moz-osx-font-smoothing: grayscale; 
+            font-family: 'Inter', sans-serif; 
+        }
         .log-entry { border-left: 3px solid; }
         .log-info { border-color: #3b82f6; } /* blue-500 */
         .log-success { border-color: #22c55e; } /* green-500 */
-        .log-warn { border-color: #f97316; } /* orange-500 */
+        .log-warn { border-color: #f59e0b; } /* amber-500 */
         .log-error { border-color: #ef4444; } /* red-500 */
         .spinner { border-top-color: #3b82f6; }
         .drop-zone.drag-over { border-color: #3b82f6; background-color: #eff6ff; }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800 font-sans">
+<body class="bg-gray-50 text-gray-800">
 
     <div id="app" class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
         <div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
-            <header class="mb-6 text-center">
-                <h1 class="text-3xl font-bold text-gray-900">Persona Translation Diagnostic JSON Generator (v8)</h1>
+            <header class="mb-8 text-center">
+                <h1 class="text-3xl font-bold text-gray-900">Persona Translation Diagnostic JSON Generator</h1>
                 <p class="mt-2 text-gray-600">Leverage AI to analyze translation triptychs via the "Analyst-Architect-Stylist" framework and generate a standardized JSON file.</p>
             </header>
 
-            <div class="space-y-6">
-                <div>
+            <div class="space-y-8">
+                <!-- Step 1: Configuration -->
+                <section>
                     <h2 class="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">1. Configuration</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label for="apiKey" class="block text-sm font-medium text-gray-700">Gemini API Key</label>
                             <input type="password" id="apiKey" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Paste your key here">
@@ -40,20 +46,21 @@
                             <input type="text" id="modelName" value="gemini-1.5-pro-latest" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                         </div>
                     </div>
-                </div>
+                </section>
 
-                <div>
+                <!-- Step 2: Input -->
+                <section>
                     <h2 class="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">2. Input</h2>
                     <div>
                         <label for="context" class="block text-sm font-medium text-gray-700">Context (Optional)</label>
                         <textarea id="context" rows="2" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., The source text is a report written by Rand and commissioned by DOD."></textarea>
                     </div>
                     <div class="mt-4">
-                        <label for="fileUpload" class="block text-sm font-medium text-gray-700">Case File (.txt)</label>
+                        <label class="block text-sm font-medium text-gray-700">Case File (.txt)</label>
                         <div id="dropZone" class="drop-zone mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer transition-colors">
                             <div class="space-y-1 text-center">
                                 <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
-                                <div class="flex text-sm text-gray-600">
+                                <div class="flex text-sm text-gray-600 justify-center">
                                     <label for="fileUploadInput" class="relative bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
                                         <span>Upload a file</span>
                                         <input id="fileUploadInput" name="file-upload" type="file" class="sr-only" accept=".txt">
@@ -64,21 +71,23 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </section>
 
-                <div>
+                <!-- Step 3: Execution -->
+                <section>
                     <h2 class="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">3. Execution</h2>
                     <button id="startButton" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed">
                         Run Analysis
                     </button>
-                </div>
+                </section>
 
-                <div>
+                <!-- Step 4: Status Log -->
+                <section>
                     <h2 class="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">4. Status Log</h2>
                     <div id="log" class="w-full h-48 bg-gray-900 text-white font-mono text-sm p-4 rounded-md overflow-y-auto">
                         <p class="text-gray-400">Waiting to start...</p>
                     </div>
-                </div>
+                </section>
             </div>
         </div>
     </div>
@@ -95,11 +104,13 @@
             const dropZone = document.getElementById('dropZone');
             let uploadedFile = null;
 
+            // --- Event Listeners ---
             fileUploadInput.addEventListener('change', (event) => handleFileSelect(event.target.files));
             startButton.addEventListener('click', runAnalysis);
             apiKeyInput.addEventListener('input', (e) => sessionStorage.setItem('geminiApiKey', e.target.value));
             apiKeyInput.value = sessionStorage.getItem('geminiApiKey') || '';
 
+            // Drag and Drop listeners
             dropZone.addEventListener('click', () => fileUploadInput.click());
             dropZone.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); dropZone.classList.add('drag-over'); });
             dropZone.addEventListener('dragleave', (e) => { e.preventDefault(); e.stopPropagation(); dropZone.classList.remove('drag-over'); });
@@ -109,6 +120,20 @@
                 dropZone.classList.remove('drag-over');
                 handleFileSelect(e.dataTransfer.files);
             });
+
+            // --- Utility Functions ---
+
+            /**
+             * Generates a UUID. This is a fallback for crypto.randomUUID() 
+             * to ensure compatibility with all browser environments (e.g., non-HTTPS).
+             * @returns {string} A new UUID.
+             */
+            function generateUUID() {
+                return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                    const r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                    return v.toString(16);
+                });
+            }
 
             function handleFileSelect(files) {
                 if (files.length > 0) {
@@ -120,7 +145,7 @@
             }
 
             function log(message, type = 'info') {
-                const typeClasses = { info: 'log-info text-blue-300', success: 'log-success text-green-300', warn: 'log-warn text-orange-300', error: 'log-error text-red-300' };
+                const typeClasses = { info: 'log-info text-blue-300', success: 'log-success text-green-300', warn: 'log-warn text-amber-300', error: 'log-error text-red-300' };
                 const entry = document.createElement('p');
                 entry.className = `log-entry pl-2 my-1 ${typeClasses[type]}`;
                 entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
@@ -130,13 +155,15 @@
                 logContainer.appendChild(entry);
                 logContainer.scrollTop = logContainer.scrollHeight;
             }
+            
+            // --- Core Logic ---
 
             async function runAnalysis() {
                 const apiKey = apiKeyInput.value;
                 const modelName = modelNameInput.value;
                 const context = contextInput.value;
-                if (!apiKey) { log('Error: API Key cannot be empty.', 'error'); return; }
-                if (!uploadedFile) { log('Error: Please upload a case file first.', 'error'); return; }
+                if (!apiKey) { log('API Key cannot be empty.', 'error'); return; }
+                if (!uploadedFile) { log('Please upload a case file first.', 'error'); return; }
 
                 startButton.disabled = true;
                 startButton.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Processing...`;
@@ -152,29 +179,46 @@
 
                     const BATCH_SIZE = 5;
                     log(`Processing in batches of up to ${BATCH_SIZE} cases.`);
-                    const finalCasesData = { cases: [] };
+                    const finalCases = [];
                     for (let i = 0; i < allCases.length; i += BATCH_SIZE) {
                         const batch = allCases.slice(i, i + BATCH_SIZE);
                         const startNum = i + 1;
                         const endNum = Math.min(i + BATCH_SIZE, allCases.length);
                         log(`Analyzing batch ${startNum}-${endNum}...`);
-                        const batchDiagnostics = await analyzeBatchRecursive(batch, context, modelName, apiKey);
-                        if (batchDiagnostics) {
-                            for (const caseData of batch) {
-                                const diagnostics = batchDiagnostics[caseData.id] || [];
-                                caseData.diagnostics = diagnostics;
-                                finalCasesData.cases.push(caseData);
-                            }
+                        
+                        const analyzedCases = await analyzeBatchRecursive(batch, context, modelName, apiKey);
+                        
+                        if (analyzedCases && analyzedCases.length > 0) {
+                             // Stitch the real IDs back onto the results from the AI
+                            const stitchedCases = analyzedCases.map((aiCase, index) => {
+                                const originalCase = batch[index]; // Assume order is preserved
+                                return {
+                                    ...aiCase,
+                                    id: originalCase.id, // Use the original, stable ID
+                                    sourceText: originalCase.sourceText,
+                                    translationText: originalCase.translationText,
+                                    revisionText: originalCase.revisionText
+                                };
+                            });
+                            finalCases.push(...stitchedCases);
                             log(`Batch ${startNum}-${endNum} analyzed successfully.`, 'success');
                         } else {
-                            log(`Batch ${startNum}-${endNum} failed analysis and was skipped.`, 'error');
+                            log(`Batch ${startNum}-${endNum} failed analysis or returned no data.`, 'error');
                         }
-                        if (i + BATCH_SIZE < allCases.length) { await new Promise(resolve => setTimeout(resolve, 1000)); }
+                        
+                        if (i + BATCH_SIZE < allCases.length) { await new Promise(resolve => setTimeout(resolve, 1000)); } // Rate limiting
                     }
-                    log('All batches processed! Generating JSON file...', 'success');
-                    downloadJson(finalCasesData, 'cases.json');
+                    
+                    if (finalCases.length > 0) {
+                        log('All batches processed! Generating JSON file...', 'success');
+                        downloadJson({ cases: finalCases }, 'cases.json');
+                    } else {
+                        log('Processing complete, but no valid analysis data was generated.', 'error');
+                    }
+
                 } catch (error) {
-                    log(`A critical error occurred during processing: ${error.message}`, 'error');
+                    log(`A critical error occurred: ${error.message}`, 'error');
+                    console.error(error);
                 } finally {
                     startButton.disabled = false;
                     startButton.textContent = 'Run Analysis';
@@ -188,54 +232,99 @@
                     const lines = block.trim().split('\n').filter(line => line.trim());
                     if (lines.length === 3) {
                         cases.push({
-                            id: `case-${crypto.randomUUID()}`,
+                            id: `case-${generateUUID()}`, // MODIFIED: Use robust UUID generator
                             sourceText: lines[0].trim(),
                             translationText: lines[1].trim(),
                             revisionText: lines[2].trim()
                         });
                     } else if (lines.length > 0) {
-                        log(`Warning: Skipping malformed text block (should have 3 lines).`, 'warn');
+                        log(`Skipping malformed text block (should have 3 lines).`, 'warn');
                     }
                 });
                 return cases;
             }
 
             async function analyzeBatchRecursive(batch, context, modelName, apiKey) {
-                if (!batch.length) return {};
+                if (!batch || batch.length === 0) return [];
 
-                const system_prompt = `
-You are a professional translation analysis tool. Your task is to analyze a batch of translation cases, each composed of a "Source Text," a "Draft Translation," and a "Revised Text."
-You must strictly adhere to the "Three-Persona" framework (The Analyst, The Architect, The Stylist) to diagnose issues in the "Draft Translation."
+                // This is the full, detailed system prompt from the markdown file.
+                const system_prompt = `# Gemini Plus Gem Instructions: Persona Translation Analyzer
 
-The Three-Persona Framework is defined as follows:
-1.  **The Analyst**: Responsible for achieving a complete, nuanced, and context-aware understanding of the source text's meaning, intent, and subtext. Their primary failure mode is **"Knowledge Deficit."**
-2.  **The Architect**: Responsible for deverbalizing the source meaning and reconstructing it within a natural, logical, and idiomatic target-language structure. Their primary failure mode is **"Process Discipline Failure."**
-3.  **The Stylist**: Responsible for crafting the final text with lexical precision, idiomatic grace, and stylistic appropriateness. Their failure modes are **"Resource Gap"** (e.g., for awkward lexical choices) or **"Process Failure"** (e.g., for typos or basic grammatical mistakes).
+## CONTEXT
 
-Your analysis must be returned as a single JSON object, without any explanatory text outside the JSON format itself.
-- The **keys** of this JSON object must be the \`case_id\` of each case.
-- The **value** for each key must be a JSON array, where each element represents a single error found in that case.
-- Each error object must contain the following fields:
-    - **persona**: The responsible persona ("The Analyst", "The Architect", or "The Stylist").
-    - **cause**: The specific failure mode ("Knowledge Deficit", "Process Discipline Failure", "Resource Gap", or "Process Failure").
-    - **original_phrase**: The phrase from the source text that relates to the error.
-    - **explanation**: A detailed explanation of the error, referencing the framework.
-    - **target_phrase**: **[CRITICAL]** The most specific, concise phrase or clause within the Draft Translation that best exemplifies the error. Your primary goal is precision. **Under no circumstances should you select the entire sentence**, unless the sentence itself is a single, short phrase. Always strive to isolate the smallest possible group of words that contains the core of the issue.
+You are the **Persona Translation Analyzer**, an expert system designed to conduct sophisticated quality assessments of translations. Your purpose is not merely to identify _what_ is wrong but to diagnose _why_ it went wrong. You operate based on a specialized "Three-Persona Framework."
 
-Ensure the JSON is perfectly formatted for programmatic parsing.`;
+## PERSONA
 
-                let userPromptParts = ["Please analyze the following batch of translation cases:"];
-                if (context) userPromptParts.push(`\n**Additional Context:**\n${context}`);
-                batch.forEach(caseData => {
-                    userPromptParts.push(`\n${'-'.repeat(30)}`);
-                    userPromptParts.push(`CASE_ID_START:${caseData.id}\n`);
-                    userPromptParts.push(`**Source Text:**\n${caseData.sourceText}`);
-                    userPromptParts.push(`**Draft Translation:**\n${caseData.translationText}`);
-                    userPromptParts.push(`**Revised Text:**\n${caseData.revisionText}`);
-                    userPromptParts.push(`\nCASE_ID_END:${caseData.id}`);
+Your persona is that of a seasoned, exceptionally discerning translation scholar. You are precise, insightful, and possess a keen eye for the subtle interplay between languages. Your analysis is always structured, objective, and articulated with sophisticated clarity.
+
+## INSTRUCTIONS
+
+Your primary task is to receive one or more translation "triptychs"—consisting of a **Source Text**, a student's **Translation**, and a polished **Revision**—and to produce a structured JSON object detailing your analysis of the student's work.
+
+### Core Analytical Model: The Three-Persona Framework
+
+You must analyze each Translation through the lens of the following three personas. Every identified issue must be attributed to a failure of one of these personas.
+
+1.  **The Analyst (Source Comprehension Expert):**
+    
+    -   **Core Mandate:** To achieve a complete, nuanced, and context-aware understanding of the source text's meaning, intent, and subtext. The Analyst's loyalty is 100% to the source.
+        
+    -   **Primary Failure Mode:** \`Knowledge Deficit\`.
+        
+2.  **The Architect (Transfer & Deverbalization Strategist):**
+    
+    -   **Core Mandate:** To deverbalize the source meaning and reconstruct it within a natural, logical, and idiomatic target-language structure.
+        
+    -   **Primary Failure Mode:** \`Process Discipline Failure\`. This is a failure to break from the source structure out of inertia.
+        
+3.  **The Stylist (Target-Language Polish Expert):**
+    
+    -   **Core Mandate:** To craft the final text with lexical precision, idiomatic grace, and stylistic appropriateness.
+        
+    -   **Failure Modes:**
+        
+        -   \`Resource Gap\`: For lexical or idiomatic awkwardness.
+            
+        -   \`Process Failure\`: For lapses in diligence, such as typos or basic grammatical errors.
+            
+
+### Output Requirements: Structured JSON
+
+You **must** return your analysis as a single, valid JSON object containing a single key, \`"cases"\`, whose value is an array of case objects.
+
+Each **case object** must contain:
+
+1.  \`id\`: A unique identifier for the case. You may use a placeholder.
+2.  \`sourceText\`, \`translationText\`, \`revisionText\`: The provided texts.
+3.  \`diagnostics\`: An array of diagnostic objects. If no errors are found, return an empty array \`[]\`.
+
+Each **diagnostic object** must contain:
+
+-   \`persona\`: (String) The responsible persona: \`"The Analyst"\`, \`"The Architect"\`, or \`"The Stylist"\`.
+-   \`cause\`: (String) The specific failure mode: \`"Knowledge Deficit"\`, \`"Process Discipline Failure"\`, \`"Resource Gap"\`, or \`"Process Failure"\`.
+-   \`original_phrase\`: (String) The corresponding phrase from the **Source Text** that relates to the issue.
+-   \`explanation\`: (String) A concise but thorough explanation of the issue, referencing the framework.
+-   \`target_phrase\`: (String) **[CRITICAL]** The most specific, concise, and **contiguous** phrase or clause from the **Translation** that exemplifies the error.
+    
+    -   **Rule of Contiguity:** The value for \`target_phrase\` **must** be a literal, uninterrupted substring of the \`translationText\`. It must be able to be found using a simple string search. **Do not use ellipses (\`...\`)** or any other method to represent discontinuous text.
+        
+    -   **Strategy for Discontinuous Errors:** Occasionally, a single conceptual error may manifest in multiple, separate words (e.g., a weak verb at the beginning of a sentence and a mismatched noun at the end). In such cases:
+        
+        1.  First, attempt to find a single, larger contiguous phrase that includes the problematic words without becoming overly long or including too much correct text.
+        2.  If that is not possible, you must choose the **single most representative segment** that contains the core of the issue. If the parts are equally problematic, select the one that occurs first in the sentence. For instance, in the case of a translation containing \`"possessed... and was,"\` if \`"possessed"\` is the primary stylistic weakness, the \`target_phrase\` should be just \`"possessed"\`.`;
+
+                let userPromptParts = ["Please analyze the following batch of translation triptychs according to the detailed instructions provided in the system prompt."];
+                if (context) userPromptParts.push(`\n**Overall Context:**\n${context}`);
+                
+                batch.forEach((caseData, index) => {
+                    userPromptParts.push(`\n\n--- TRIPTYCH ${index + 1} ---`);
+                    userPromptParts.push(`Source Text: ${caseData.sourceText}`);
+                    userPromptParts.push(`Translation: ${caseData.translationText}`);
+                    userPromptParts.push(`Revision: ${caseData.revisionText}`);
                 });
-                userPromptParts.push(`\n${'-'.repeat(30)}`);
-                userPromptParts.push("\nPlease adhere strictly to the instructions and return a single JSON object keyed by case_id.");
+
+                userPromptParts.push("\n\nPlease adhere strictly to the instructions and return a single JSON object containing a 'cases' array, with one case object for each triptych provided above.");
                 
                 const user_prompt = userPromptParts.join('\n');
                 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
@@ -256,18 +345,29 @@ Ensure the JSON is perfectly formatted for programmatic parsing.`;
                     const data = await response.json();
                     const responseText = data.candidates[0].content.parts[0].text;
                     const cleanedText = responseText.replace(/```json\s*|\s*```/g, '').trim();
-                    return JSON.parse(cleanedText);
+                    const parsedJson = JSON.parse(cleanedText);
+
+                    if (!parsedJson.cases || !Array.isArray(parsedJson.cases)) {
+                        throw new Error("API response did not contain a 'cases' array.");
+                    }
+                    return parsedJson.cases;
+
                 } catch (error) {
                     if (batch.length === 1) {
-                        log(`Error: Analysis failed for case ${batch[0].id} even with a batch size of 1. Error: ${error.message}`, 'error');
-                        return { [batch[0].id]: [] };
+                        log(`Analysis failed for a single case even after splitting. Error: ${error.message}`, 'error');
+                        return []; // Return empty array for the failed case
                     }
-                    log(`Warning: Analysis failed with batch size ${batch.length}. Splitting the batch in two and retrying...`, 'warn');
-                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    log(`Analysis failed with batch size ${batch.length}. Splitting batch and retrying...`, 'warn');
+                    await new Promise(resolve => setTimeout(resolve, 2000)); // Wait before retrying
+                    
                     const mid = Math.ceil(batch.length / 2);
-                    const firstHalfResults = await analyzeBatchRecursive(batch.slice(0, mid), context, modelName, apiKey);
-                    const secondHalfResults = await analyzeBatchRecursive(batch.slice(mid), context, modelName, apiKey);
-                    return { ...firstHalfResults, ...secondHalfResults };
+                    const firstHalf = batch.slice(0, mid);
+                    const secondHalf = batch.slice(mid);
+                    
+                    const firstHalfResults = await analyzeBatchRecursive(firstHalf, context, modelName, apiKey);
+                    const secondHalfResults = await analyzeBatchRecursive(secondHalf, context, modelName, apiKey);
+                    
+                    return [...firstHalfResults, ...secondHalfResults];
                 }
             }
 
