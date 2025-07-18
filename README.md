@@ -1,11 +1,11 @@
 
 # Persona Translation Analyzer
 
-A sophisticated, two-part system for AI-powered translation quality assessment, moving beyond literal accuracy to diagnose issues of style, structure, and nuance.
+A sophisticated, client-side tool for AI-powered translation quality assessment, moving beyond literal accuracy to diagnose issues of style, structure, and nuance through a calibrated analytical framework.
 
 ## The Core Concept: A Three-Persona Framework
 
-Traditional translation analysis often focuses on grammatical correctness and literal equivalence. This project introduces a more holistic model, evaluating a translation from three distinct cognitive roles, or "Personas." This framework allows for a deeper, more actionable critique that mirrors the complex cognitive process of a professional human translator.
+Traditional translation analysis often focuses on grammatical correctness and literal equivalence. This project introduces a more holistic model, evaluating a translation from three distinct cognitive roles, or "Personas." This framework allows for a deeper, more actionable critique that mirrors the complex cognitive process of a professional human translator, identifying not just _what_ is wrong, but _why_ it went wrong.
 
 1.  **The Analyst (Source Comprehension Expert):** This persona is singularly focused on the **source text**. Its mission is to conduct a thorough investigation of the original material, ensuring a complete and precise understanding of its facts, intent, style, and subtext.
     
@@ -20,87 +20,138 @@ Traditional translation analysis often focuses on grammatical correctness and li
     -   **Failure Modes:** A `Resource Gap` (lexical awkwardness) or a `Process Failure` (a lapse in diligence and polish).
         
 
-## How It Works: A Two-Step Workflow
+## How It Works: A Streamlined Workflow
 
-The system is composed of two distinct, client-side tools that work in tandem.
+The system has been refactored into two core components: a set of AI instructions and a powerful, standalone visualizer.
 
-### Step 1: Generation (`generator.html`)
+### Step 1: AI-Powered Analysis
 
-This tool leverages a Large Language Model (Google's Gemini) to perform the diagnostic analysis.
+The analysis is performed by a Large Language Model (e.g., Google's Gemini) that has been given a detailed system prompt.
 
-1.  **Input:** The user provides a `.txt` file containing translation "triptychs." Each triplet consists of the source text, a draft translation, and a final revised version.
+1.  **Input:** The user provides the AI with one or more translation "triptychs." Each triplet consists of the source text, a draft translation, and a final revised version.
     
-2.  **Configuration:** The user enters their Gemini API key.
+2.  **Processing:** The AI, guided by the `ai_instruction_json_generation.md` prompt, analyzes the draft using the calibrated Analyst-Architect-Stylist framework.
     
-3.  **Processing:** The tool sends the triplets to the AI, along with a detailed system prompt that instructs it to analyze the draft using the calibrated Analyst-Architect-Stylist framework.
-    
-4.  **Output:** The tool generates a structured `cases.json` file containing the detailed analysis, which the user then downloads.
+3.  **Output:** The AI generates a structured `JSON` object containing the detailed analysis, which the user then copies.
     
 
-### Step 2: Analysis (`analyzer.html`)
+### Step 2: Interactive Visualization (`analyzer.html`)
 
-This tool is a rich, interactive visualizer for the data produced by the Generator.
+This tool is a rich, interactive, and fully responsive visualizer for the data produced by the AI.
 
-1.  **Input:** The user loads the `cases.json` file generated in the previous step.
+1.  **Input:** The user loads the `JSON` data, either by pasting it directly into the application or by loading a `.json` file.
     
-2.  **Visualization:** The tool renders a comprehensive, continuous report:
+2.  **Visualization:** The tool renders a comprehensive and interactive report:
     
-    -   A clean, three-column layout displays the source, draft, and revision side-by-side for easy comparison.
+    -   **Two-Panel Layout:** A fluid, responsive layout presents the case list on the left and a dedicated, context-aware "Critique Panel" on the right.
         
-    -   Within the draft translation, problematic phrases and sentences are highlighted with color-coded ribbons corresponding to the responsible Persona.
+    -   **Side-by-Side Comparison:** On larger screens, each case card displays the source, draft, and revision in a three-column format for immediate comparison.
         
-    -   Hovering over any highlighted text reveals a detailed tooltip with the specific cause and the AI's full explanation.
+    -   **Interactive Diagnostics:** Clicking on a case, a highlighted phrase in the text, or a specific diagnostic card in the critique panel instantly focuses the relevant information across the entire interface.
+        
+    -   **Persona Filtering:** A header dashboard allows users to filter the entire report by persona, automatically scrolling to the first relevant case.
+        
+    -   **At-a-Glance Indicators:** Color-coded dots in each case header provide a quick visual map of the diagnostic types within, enhancing scannability when filtering.
         
 
 ## Features
 
--   **Deep, Nuanced Analysis:** Moves beyond simple error-checking to provide qualitative feedback on style and structure based on a calibrated analytical framework.
+-   **Deep, Nuanced Analysis:** Moves beyond simple error-checking to provide qualitative feedback on style and structure.
     
--   **Interactive Diagnostic Identifiers:** Replaces a static count with interactive, color-coded dots in each case header. Hovering over an identifier instantly highlights the corresponding error in the text, providing a fluid way to locate issues, especially overlapping ones.
+-   **Fully Interactive UI:** A dynamic, two-panel interface creates a seamless analytical workflow where all components are interconnected.
     
--   **Reliable Error Highlighting:** To ensure every diagnosed issue can be visually highlighted, the system enforces a strict 'contiguity' rule in its AI instructions. The AI is required to define each `target_phrase` as a literal, uninterrupted segment of text from the draft. This prevents data-mismatch errors and guarantees that every item in the diagnostic report corresponds perfectly to a highlightable phrase in the analyzer.
+-   **Responsive Design:** The layout adapts gracefully to any screen size, from large desktop monitors to mobile devices, ensuring a polished experience.
     
--   **Focus Control:** A toggle allows the user to show or hide the "Revised Text" column, enabling focused comparison between the source and the draft translation while preserving the layout.
+-   **Enhanced Readability:** A focus on clear typography, with increased font sizes and optimized line height, makes for comfortable long-form reading and analysis.
     
--   **Cohesive Reading Experience:** Presents cases as a single, continuous document to facilitate in-context understanding of sequential texts.
+-   **Client-Side Operation:** The analyzer runs entirely in the browser with no server-side dependencies or complex setup required.
     
--   **Client-Side Operation:** No server or complex setup required. Both tools run directly in your web browser.
-    
--   **Standardized Data Format:** The `cases.json` output provides a structured, portable record of the analysis.
+-   **Standardized Data Format:** The use of a structured `JSON` input provides a portable and consistent record of the analysis.
     
 
 ## Setup and Usage
 
-1.  **Prepare Your Data:** Create a `.txt` file. For each translation case you want to analyze, add the source text, the draft translation, and the final revision, each on its own line. Separate each three-line case with a blank line.
+1.  **Generate Diagnostics:**
     
-2.  **Generate Diagnostics:**
+    -   Using an AI platform of your choice (e.g., Google's AI Studio), provide the AI with the system prompt from `ai_instruction_json_generation.md`.
+        
+    -   Provide the AI with your translation triptychs.
+        
+    -   Copy the resulting `JSON` output from the AI.
+        
+2.  **Review the Analysis:**
     
-    -   Open `generator.html` in a modern web browser.
+    -   Open `analyzer.html` in a modern web browser.
         
-    -   Paste your Gemini API key into the designated field.
-        
-    -   Upload your `.txt` file.
-        
-    -   Click "Run Analysis" and wait for the process to complete.
-        
-    -   Download the resulting `cases.json` file.
-        
-3.  **Review the Analysis:**
-    
-    -   Open `analyzer.html` in your browser.
-        
-    -   Drag-and-drop or click to load the `cases.json` file.
+    -   Click "Paste JSON" to paste the content you copied, or save the content as a `.json` file and load it via the "Load File" button.
         
     -   Review the interactive report.
         
 
-## Technical Details
+## Building an Offline Production Version
 
--   **Stack:** Vanilla JavaScript, Tailwind CSS, HTML5
+For use in isolated or secure environments, the `analyzer.html` tool can be made fully self-contained.
+
+### 1. Project Structure
+
+Organize your files as follows:
+
+```
+/persona-translation-analyzer-offline/
+|-- analyzer.html
+|-- /assets/
+|   |-- /css/
+|   |   |-- tailwind.min.css
+|   |   |-- fonts.css
+|   |   |-- styles.css
+|   |-- /fonts/
+|   |   |-- (all .woff2 font files)
+```
+
+### 2. Download Dependencies
+
+The analyzer requires **Tailwind CSS** and the **Inter** & **Noto Sans SC** fonts.
+
+-   **Tailwind CSS:** Download the pre-compiled `tailwind.min.css` file from the [official releases](https://github.com/tailwindlabs/tailwindcss/releases "null") and place it in `/assets/css/`.
     
--   **Dependencies:** None, apart from the browser's native capabilities. The Generator requires an internet connection to access the Gemini API.
+-   **Fonts:** Use a tool like [Google Webfonts Helper](https://gwfh.mranftl.com/fonts "null") to download the necessary font files (`.woff2` format).
+    
+    -   **Fonts to select:** `Inter` and `Noto Sans SC`.
+        
+    -   **Character sets:** `latin`, `latin-ext` (for Spanish/European languages), and `chinese-simplified`.
+        
+    -   **Organization:** Place all `.woff2` files in `/assets/fonts/`. Copy the CSS provided by the tool into `/assets/css/fonts.css`.
+        
+
+### 3. Create Local Stylesheets
+
+-   **`styles.css`:** Create this file in `/assets/css/`. Copy all CSS rules from the `<style>` block in `analyzer.html` and paste them into this new file.
+    
+-   **`fonts.css`:** Use the CSS content from the font download step. For optimal multi-language support, structure this file as a "font stack" that prioritizes `Noto Sans SC` for Chinese characters before falling back to `Inter` for Latin scripts.
     
 
-## License
+### 4. Update `analyzer.html`
 
-This project is licensed under the MIT License. See the `LICENSE` file for details.
+Modify the `<head>` of `analyzer.html` to link to your local, offline assets. Remove the CDN links and the inline `<style>` block.
+
+**Replace this:**
+
+```
+<script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
+<link rel="preconnect" href="[https://fonts.googleapis.com](https://fonts.googleapis.com)">
+<link rel="preconnect" href="[https://fonts.gstatic.com](https://fonts.gstatic.com)" crossorigin>
+<link href="[https://fonts.googleapis.com/css2?family=Inter...&display=swap](https://fonts.googleapis.com/css2?family=Inter...&display=swap)" rel="stylesheet">
+<style>
+    /* ... inline styles ... */
+</style>
+```
+
+**With this:**
+
+```
+<link rel="stylesheet" href="./assets/css/tailwind.min.css">
+<link rel="stylesheet" href="./assets/css/fonts.css">
+<link rel="stylesheet" href="./assets/css/styles.css">
+```
+
+The resulting folder is now a fully portable, production-ready application that will run in any modern browser without an internet connection.
