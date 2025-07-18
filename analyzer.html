@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Persona Translation Analyzer v2.2</title>
+    <title>Persona Translation Analyzer v2.2.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -41,15 +41,13 @@
         /* --- Layout & Panels --- */
         .app-grid {
             display: grid;
-            /* A more fluid grid for desktop: main content gets more space, side panel has a reasonable min/max */
             grid-template-columns: minmax(0, 3fr) minmax(380px, 1.5fr);
             grid-template-rows: auto minmax(0, 1fr);
             grid-template-areas: "header header" "main aside";
             gap: 1.5rem;
-            height: 100vh; /* Lock grid to viewport height on desktop */
+            height: 100vh;
         }
         #cases-list, #critique-panel {
-            /* Ensure panels scroll independently on desktop */
             overflow-y: auto;
         }
 
@@ -57,18 +55,18 @@
             .app-grid {
                 grid-template-columns: 1fr;
                 grid-template-areas: "header" "main" "aside";
-                height: auto; /* Let height be natural on mobile */
+                height: auto;
             }
             #cases-list {
-                overflow-y: visible; /* Allow natural document flow on mobile */
+                overflow-y: visible;
                 min-height: 300px;
             }
             #critique-panel {
                 position: sticky;
                 bottom: 0;
-                max-height: 50vh; /* Give the sticky panel a max-height */
+                max-height: 50vh;
                 z-index: 30;
-                overflow-y: auto; /* The entire panel scrolls */
+                overflow-y: auto;
             }
         }
         
@@ -77,7 +75,6 @@
             box-shadow: 0 0 0 2px var(--accent-analyst);
             border-color: var(--accent-analyst);
         }
-        /* Persona-specific active highlight when filtering */
         .filter-active-analyst .case-card.is-active {
             box-shadow: 0 0 0 2px var(--accent-analyst);
             border-color: var(--accent-analyst);
@@ -127,7 +124,6 @@
             border-radius: 9999px;
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        /* When a filter is active, highlight matching dots */
         .filter-active-analyst .diag-dot.persona-analyst,
         .filter-active-architect .diag-dot.persona-architect,
         .filter-active-stylist .diag-dot.persona-stylist {
@@ -157,7 +153,7 @@
         <!-- App Header -->
         <header style="grid-area: header;" class="bg-white/80 backdrop-blur-lg border border-[var(--border-color)] rounded-xl shadow-sm p-4 sticky top-4 z-20">
             <div class="flex flex-wrap justify-between items-center gap-4">
-                <h1 class="text-xl font-bold text-slate-800">Persona Translation Analyzer <span class="font-normal text-lg text-slate-400">v2.2</span></h1>
+                <h1 class="text-xl font-bold text-slate-800">Persona Translation Analyzer <span class="font-normal text-lg text-slate-400">v2.2.1</span></h1>
                 <div id="controls" class="flex items-center gap-2">
                     <button id="load-sample-btn" class="px-3 py-1.5 text-sm font-semibold bg-emerald-500 text-white rounded-md hover:bg-emerald-600 transition-default">Load Sample</button>
                     <button id="paste-json-btn" class="px-3 py-1.5 text-sm font-semibold bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-default">Paste JSON</button>
@@ -303,15 +299,14 @@
                 const { html, mismatchCount } = annotateTranslation(caseData);
                 const mismatchHtml = mismatchCount > 0 ? `<span class="text-xs font-medium text-amber-600" title="${mismatchCount} diagnostics had a 'target_phrase' that could not be matched.">${mismatchCount} unmatched</span>` : '';
                 
-                // Generate diagnostic dots
                 const diagnosticPersonas = new Set(caseData.diagnostics?.map(d => d.persona) || []);
                 const dotsHtml = Array.from(diagnosticPersonas).map(persona => 
-                    `<span class="diag-dot persona-${getPersonaClass(persona)} bg-persona" title="${persona}"></span>`
+                    `<span class="diag-dot persona-${getPersonaClass(persona)} bg-persona" title="Focus on ${persona}" data-persona-focus="${persona}"></span>`
                 ).join('');
 
                 return `
-                <div id="case-card-${caseData.id}" class="case-card scroll-margin bg-white border border-slate-200 rounded-xl shadow-sm mb-6 cursor-pointer transition-default" data-case-id="${caseData.id}">
-                    <div class="p-4 border-b border-slate-200 flex justify-between items-center">
+                <div id="case-card-${caseData.id}" class="case-card scroll-margin bg-white border border-slate-200 rounded-xl shadow-sm mb-6 transition-default" data-case-id="${caseData.id}">
+                    <div class="p-4 border-b border-slate-200 flex justify-between items-center cursor-pointer">
                         <div class="flex items-center gap-3">
                             <h2 class="font-bold text-slate-800">Case ${index + 1}</h2>
                             <div class="flex items-center gap-1.5">${dotsHtml}</div>
@@ -378,13 +373,11 @@
         }
 
         function updateActiveStates() {
-            // Add a class to the app wrapper for filter-specific styling
             dom.app.classList.remove('filter-active-analyst', 'filter-active-architect', 'filter-active-stylist');
             if (state.activeFilter) {
                 dom.app.classList.add(`filter-active-${getPersonaClass(state.activeFilter)}`);
             }
 
-            // Update case cards
             document.querySelectorAll('.case-card').forEach(card => {
                 card.classList.toggle('is-active', card.dataset.caseId === state.activeCaseId);
                 const caseData = state.cases.find(c => c.id === card.dataset.caseId);
@@ -395,17 +388,14 @@
                 card.classList.toggle('is-filtered', isFiltered);
             });
 
-            // Update diagnostic highlights in text
             document.querySelectorAll('.diagnostic-highlight').forEach(span => {
                 span.classList.toggle('is-active', span.dataset.diagnosticId === state.activeDiagnosticId);
             });
 
-            // Update diagnostic cards in critique panel
             document.querySelectorAll('.diagnostic-card').forEach(card => {
                 card.classList.toggle('is-active', card.dataset.diagnosticId === state.activeDiagnosticId);
             });
             
-            // Update filter cards
             document.querySelectorAll('.stat-card').forEach(card => {
                 card.classList.toggle('bg-slate-200', card.dataset.filter === state.activeFilter);
                 card.classList.toggle('bg-slate-100/50', card.dataset.filter !== state.activeFilter);
@@ -432,21 +422,42 @@
 
         function handleCaseListClick(e) {
             const caseCard = e.target.closest('.case-card');
-            const highlightSpan = e.target.closest('.diagnostic-highlight');
+            if (!caseCard) return;
 
-            if (caseCard) {
-                state.activeCaseId = caseCard.dataset.caseId;
-                state.activeDiagnosticId = null; // Reset diagnostic selection when changing case
-                
-                if (highlightSpan) {
-                    state.activeDiagnosticId = highlightSpan.dataset.diagnosticId;
+            const highlightSpan = e.target.closest('.diagnostic-highlight');
+            const focusDot = e.target.closest('.diag-dot');
+
+            // 1. Set active case
+            state.activeCaseId = caseCard.dataset.caseId;
+            // 2. Render its critique panel
+            renderCritiquePanel();
+            // 3. Reset active diagnostic
+            state.activeDiagnosticId = null;
+
+            // 4. Determine which specific element was clicked and update active diagnostic
+            if (focusDot) {
+                const personaToFocus = focusDot.dataset.personaFocus;
+                const firstMatchingDiagnostic = state.cases
+                    .find(c => c.id === state.activeCaseId)
+                    ?.diagnostics?.find(d => d.persona === personaToFocus);
+                if (firstMatchingDiagnostic) {
+                    state.activeDiagnosticId = firstMatchingDiagnostic.id;
+                }
+            } else if (highlightSpan) {
+                state.activeDiagnosticId = highlightSpan.dataset.diagnosticId;
+            }
+
+            // 5. Scroll to the active diagnostic card if there is one
+            if (state.activeDiagnosticId) {
+                // Use a timeout to ensure the DOM is ready after renderCritiquePanel
+                setTimeout(() => {
                     const diagnosticCard = dom.critiqueContent.querySelector(`[data-diagnostic-id="${state.activeDiagnosticId}"]`);
                     diagnosticCard?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-                
-                renderCritiquePanel();
-                updateActiveStates();
+                }, 50);
             }
+
+            // 6. Update all UI states
+            updateActiveStates();
         }
 
         function handleCritiquePanelClick(e) {
@@ -464,30 +475,26 @@
             if (!filterCard) return;
 
             const newFilter = filterCard.dataset.filter;
-            // If clicking the same filter, toggle it off. Otherwise, set the new filter.
             state.activeFilter = state.activeFilter === newFilter ? null : newFilter;
 
             if (state.activeFilter) {
-                // When a filter is activated, find the first matching case and make it active.
                 const firstMatchingCase = state.cases.find(c =>
                     c.diagnostics?.some(d => d.persona === state.activeFilter)
                 );
 
                 if (firstMatchingCase) {
                     state.activeCaseId = firstMatchingCase.id;
-                    state.activeDiagnosticId = null; // Reset diagnostic focus
+                    state.activeDiagnosticId = null;
 
                     const targetCard = document.getElementById(`case-card-${firstMatchingCase.id}`);
                     targetCard?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
                 } else {
-                    // No matches found, clear active case
                     state.activeCaseId = null;
                     state.activeDiagnosticId = null;
                 }
             }
             
-            // Re-render the UI based on the new state
             renderCritiquePanel();
             updateActiveStates();
         }
@@ -500,17 +507,15 @@
                 const data = JSON.parse(cleanedString);
                 if (!data.cases || !Array.isArray(data.cases)) throw new Error("JSON must have a 'cases' array.");
                 
-                // Reset state and process new data
                 state.cases = data.cases;
                 state.diagnosticsMap.clear();
                 state.activeCaseId = data.cases.length > 0 ? data.cases[0].id : null;
                 state.activeDiagnosticId = null;
                 state.activeFilter = null;
 
-                // Assign unique IDs to diagnostics for reliable mapping
                 state.cases.forEach(caseData => {
                     (caseData.diagnostics || []).forEach((diag, index) => {
-                        const uniqueId = `${caseData.id}-diag-${index}`;
+                        const uniqueId = `${caseData.id || crypto.randomUUID()}-diag-${index}`;
                         diag.id = uniqueId;
                         state.diagnosticsMap.set(uniqueId, diag);
                     });
@@ -543,14 +548,14 @@
                     return { ...diag, startIndex, endIndex: startIndex + diag.target_phrase.length };
                 })
                 .filter(Boolean)
-                .sort((a,b) => a.startIndex - b.startIndex || (b.endIndex - b.startIndex) - (a.endIndex - a.startIndex)); // Sort by start index, then by length desc
+                .sort((a,b) => a.startIndex - b.startIndex || (b.endIndex - b.startIndex) - (a.endIndex - a.startIndex));
 
             const mismatchCount = diagnostics.length - annotations.length;
             let lastIndex = 0;
             let htmlParts = [];
             
             annotations.forEach(anno => {
-                if(anno.startIndex < lastIndex) return; // Skip overlapping annotations
+                if(anno.startIndex < lastIndex) return;
                 htmlParts.push(escapeHtml(text.substring(lastIndex, anno.startIndex)));
                 const personaClass = getPersonaClass(anno.persona);
                 htmlParts.push(`<span class="diagnostic-highlight persona-${personaClass}" data-diagnostic-id="${anno.id}">${escapeHtml(text.substring(anno.startIndex, anno.endIndex))}</span>`);
