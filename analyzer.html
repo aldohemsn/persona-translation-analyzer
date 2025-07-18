@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Persona Translation Analyzer (v14)</title>
+    <title>Interactive Persona Translation Analyzer (v16)</title>
     <!-- TailwindCSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Local Font Definitions -->
@@ -27,6 +27,18 @@
             max-width: 24rem;
             pointer-events: none;
         }
+        /* MODIFIED: Added styles for rendered markdown in tooltips */
+        #global-tooltip strong { color: #fff; font-weight: 600; }
+        #global-tooltip em { font-style: italic; }
+        #global-tooltip code {
+            background-color: rgba(0,0,0,0.4);
+            color: #a7f3d0; /* emerald-200 */
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 0.9em;
+        }
+
 
         /* Diagnostic Ribbons */
         .ribbon {
@@ -82,7 +94,10 @@
         }
         
         /* Modals & Toggles */
-        .modal-overlay { transition: opacity 0.3s ease; }
+        .modal-overlay { 
+            transition: opacity 0.3s ease; 
+            z-index: 50;
+        }
         .modal-content { transition: transform 0.3s ease; }
         .toggle-checkbox:checked + .toggle-label { background-color: #3b82f6; }
         .toggle-checkbox:checked + .toggle-label::after { transform: translateX(100%); }
@@ -162,21 +177,20 @@
         }
         #main-header.header-collapsed #collapse-icon { transform: rotate(180deg); }
 
-        /* --- MODIFIED: Floating Controls Style --- */
+        /* Floating Controls Style */
         #floating-controls {
             transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
-            opacity: 0.6; /* Default less intrusive state */
+            opacity: 0.6;
             transform-origin: bottom right;
         }
         #floating-controls:hover {
             opacity: 1;
-            transform: scale(1.03); /* Slight zoom on hover */
+            transform: scale(1.03);
         }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 leading-relaxed">
 
-    <!-- MODIFIED: Floating Controls moved to bottom-right and made more compact -->
     <div id="floating-controls" class="hidden lg:flex fixed bottom-4 right-4 z-30 bg-white/70 backdrop-blur-sm p-2 rounded-xl shadow-lg border border-gray-200/50 flex-col gap-3">
         <div class="flex items-center justify-between w-36">
             <span class="text-sm font-medium text-gray-700">Diagnostics</span>
@@ -246,7 +260,7 @@
         </main>
     </div>
     
-    <!-- Modals (unchanged) -->
+    <!-- Modals -->
     <div id="modal-analyst" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden opacity-0" role="dialog" aria-modal="true" aria-labelledby="modal-analyst-title">
         <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-md p-6 transform scale-95">
             <div class="flex items-start justify-between">
@@ -521,7 +535,14 @@
                 const tooltipId = ribbon.getAttribute('data-tooltip-id');
                 const diagData = diagnosisDataStore[tooltipId];
                 if (!diagData) return;
-                globalTooltip.innerHTML = `<div class="p-2"><div class="font-bold text-base mb-2 flex items-center"><span class="mr-2 px-2 py-0.5 rounded-md text-sm text-white ${getPersonaBgClass(diagData.persona)}">${escapeHtml(diagData.persona)}</span><span class="text-gray-300">${escapeHtml(diagData.cause)}</span></div><p class="text-gray-200">${escapeHtml(diagData.explanation)}</p></div>`;
+                globalTooltip.innerHTML = `
+                    <div class="p-2">
+                        <div class="font-bold text-base mb-2 flex items-center">
+                            <span class="mr-2 px-2 py-0.5 rounded-md text-sm text-white ${getPersonaBgClass(diagData.persona)}">${escapeHtml(diagData.persona)}</span>
+                            <span class="text-gray-300">${escapeHtml(diagData.cause)}</span>
+                        </div>
+                        <p class="text-gray-200">${renderMarkdown(diagData.explanation)}</p>
+                    </div>`;
                 globalTooltip.style.visibility = 'visible';
                 globalTooltip.style.opacity = '1';
                 positionTooltip(event);
@@ -556,9 +577,29 @@
                 setTimeout(() => modal.classList.add('hidden'), 300);
             }
             
+            // --- UTILITIES ---
             function getRibbonClass(persona) { if (persona === "The Analyst") return "ribbon-analyst"; if (persona === "The Architect") return "ribbon-architect"; if (persona === "The Stylist") return "ribbon-stylist"; return ""; }
             function getPersonaBgClass(persona) { if (persona === "The Analyst") return "bg-blue-600"; if (persona === "The Architect") return "bg-amber-500"; if (persona === "The Stylist") return "bg-green-600"; return "bg-gray-600"; }
             function escapeHtml(text) { if (typeof text !== 'string') return ''; return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
+            
+            // --- NEW: Markdown Rendering Function ---
+            function renderMarkdown(text) {
+                if (typeof text !== 'string') return '';
+                
+                // First, escape any potential HTML in the text to prevent injection.
+                let safeText = escapeHtml(text);
+
+                // Then, replace markdown-like syntax with HTML tags.
+                // Bold: **text** or __text__
+                safeText = safeText.replace(/\*\*(.*?)\*\*|__(.*?)__/g, '<strong>$1$2</strong>');
+                // Italic: *text* or _text_
+                safeText = safeText.replace(/\*(.*?)\*|_(.*?)_/g, '<em>$1$2</em>');
+                // Code: `text`
+                safeText = safeText.replace(/`(.*?)`/g, '<code>$1</code>');
+                
+                return safeText;
+            }
+
             function showToast(message, type = 'success') { const toast = document.getElementById('toast-notification'); const toastMessage = document.getElementById('toast-message'); toastMessage.textContent = message; toast.className = `bg-gray-900 text-white font-semibold py-2 px-5 rounded-full shadow-lg`; if (type === 'error') toast.classList.replace('bg-gray-900', 'bg-red-600'); toast.classList.add('show'); clearTimeout(toastTimeout); toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, appConfig.toastDuration); }
             function copyToClipboard(text) { const textArea = document.createElement('textarea'); textArea.value = text; textArea.style.position = 'fixed'; textArea.style.left = '-9999px'; document.body.appendChild(textArea); textArea.focus(); textArea.select(); try { document.execCommand('copy'); } catch (err) { console.error('Fallback: Oops, unable to copy', err); } document.body.removeChild(textArea); }
         });
