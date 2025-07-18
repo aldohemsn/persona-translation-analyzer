@@ -3,159 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Persona Translation Analyzer v2.2.1</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-color: #f8fafc; /* slate-50 */
-            --panel-bg-color: #ffffff;
-            --border-color: #e2e8f0; /* slate-200 */
-            --text-primary: #0f172a; /* slate-900 */
-            --text-secondary: #64748b; /* slate-500 */
-            --accent-analyst: #3b82f6; /* blue-500 */
-            --accent-architect: #f97316; /* orange-500 */
-            --accent-stylist: #16a34a; /* green-600 */
-            --highlight-bg: #fefce8; /* yellow-50 */
-        }
-        html {
-            scroll-behavior: smooth;
-        }
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-        .font-code { font-family: 'Source Code Pro', monospace; }
-
-        /* --- Custom Scrollbar --- */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: var(--border-color); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-        /* --- Layout & Panels --- */
-        .app-grid {
-            display: grid;
-            grid-template-columns: minmax(0, 3fr) minmax(380px, 1.5fr);
-            grid-template-rows: auto minmax(0, 1fr);
-            grid-template-areas: "header header" "main aside";
-            gap: 1.5rem;
-            height: 100vh;
-        }
-        #cases-list, #critique-panel {
-            overflow-y: auto;
-        }
-
-        @media (max-width: 1024px) {
-            .app-grid {
-                grid-template-columns: 1fr;
-                grid-template-areas: "header" "main" "aside";
-                height: auto;
-            }
-            #cases-list {
-                overflow-y: visible;
-                min-height: 300px;
-            }
-            #critique-panel {
-                position: sticky;
-                bottom: 0;
-                max-height: 50vh;
-                z-index: 30;
-                overflow-y: auto;
-            }
-        }
-        
-        /* --- Active States & Highlighting --- */
-        .case-card.is-active {
-            box-shadow: 0 0 0 2px var(--accent-analyst);
-            border-color: var(--accent-analyst);
-        }
-        .filter-active-analyst .case-card.is-active {
-            box-shadow: 0 0 0 2px var(--accent-analyst);
-            border-color: var(--accent-analyst);
-        }
-        .filter-active-architect .case-card.is-active {
-            box-shadow: 0 0 0 2px var(--accent-architect);
-            border-color: var(--accent-architect);
-        }
-        .filter-active-stylist .case-card.is-active {
-            box-shadow: 0 0 0 2px var(--accent-stylist);
-            border-color: var(--accent-stylist);
-        }
-
-        .case-card.is-filtered { opacity: 0.4; transition: opacity 0.3s; }
-        .case-card.is-filtered:hover { opacity: 1; }
-        
-        .diagnostic-highlight {
-            background-color: rgba(59, 130, 246, 0.1);
-            cursor: pointer;
-            border-radius: 3px;
-            padding: 0 2px;
-            transition: background-color 0.2s;
-        }
-        .diagnostic-highlight.is-active {
-            background-color: rgba(59, 130, 246, 0.25);
-            box-shadow: 0 0 0 2px var(--accent-analyst);
-        }
-
-        .diagnostic-card.is-active {
-            transform: scale(1.02);
-            box-shadow: 0 4px 15px -2px rgba(0,0,0,0.1);
-            border-color: var(--accent-analyst);
-        }
-        
-        /* --- Persona Specific Colors & Elements --- */
-        .persona-analyst { --persona-color: var(--accent-analyst); }
-        .persona-architect { --persona-color: var(--accent-architect); }
-        .persona-stylist { --persona-color: var(--accent-stylist); }
-        .border-persona { border-left-color: var(--persona-color); }
-        .text-persona { color: var(--persona-color); }
-        .bg-persona { background-color: var(--persona-color); }
-
-        .diag-dot {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 9999px;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .filter-active-analyst .diag-dot.persona-analyst,
-        .filter-active-architect .diag-dot.persona-architect,
-        .filter-active-stylist .diag-dot.persona-stylist {
-            transform: scale(1.5);
-            box-shadow: 0 0 0 2px var(--panel-bg-color), 0 0 0 4px var(--persona-color);
-        }
-
-        /* --- Transitions & Animations --- */
-        .transition-default { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in { animation: fadeIn 0.4s both; }
-        
-        /* --- Drop Zone --- */
-        .drop-zone.drag-over {
-            border-color: var(--accent-analyst);
-            background-color: #eff6ff; /* blue-50 */
-        }
-        
-        /* --- Utility --- */
-        .scroll-margin { scroll-margin-top: 8rem; }
-    </style>
+    <title>Persona Translation Analyzer (Offline)</title>
+    <link rel="stylesheet" href="./assets/css/tailwind.min.css">
+    <link rel="stylesheet" href="./assets/css/fonts.css">
+    <link rel="stylesheet" href="./assets/css/styles.css">
 </head>
 <body>
 
     <div id="app" class="app-grid p-4 sm:p-6">
         
-        <!-- App Header -->
         <header style="grid-area: header;" class="bg-white/80 backdrop-blur-lg border border-[var(--border-color)] rounded-xl shadow-sm p-4 sticky top-4 z-20">
             <div class="flex flex-wrap justify-between items-center gap-4">
-                <h1 class="text-xl font-bold text-slate-800">Persona Translation Analyzer <span class="font-normal text-lg text-slate-400">v2.2.1</span></h1>
+                <h1 class="text-xl font-bold text-slate-800">Persona Translation Analyzer <span class="font-normal text-lg text-slate-400">v2.2.1-prod</span></h1>
                 <div id="controls" class="flex items-center gap-2">
-                    <button id="load-sample-btn" class="px-3 py-1.5 text-sm font-semibold bg-emerald-500 text-white rounded-md hover:bg-emerald-600 transition-default">Load Sample</button>
                     <button id="paste-json-btn" class="px-3 py-1.5 text-sm font-semibold bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-default">Paste JSON</button>
                     <label for="file-upload" class="cursor-pointer px-3 py-1.5 text-sm font-semibold bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-default">Load File</label>
                     <input type="file" id="file-upload" class="hidden" accept=".json">
@@ -163,25 +23,19 @@
             </div>
             <div id="stats-dashboard" class="mt-4 pt-4 border-t border-[var(--border-color)] grid grid-cols-1 sm:grid-cols-4 gap-4 hidden">
                  <h3 class="text-sm font-semibold text-slate-500 self-center hidden sm:block">FILTERS:</h3>
-                 <!-- Stats will be injected here -->
-            </div>
+                 </div>
         </header>
 
-        <!-- Main Content: Cases List -->
         <main id="cases-list" style="grid-area: main;" class="pr-2 -mr-2">
-            <!-- Initial state / Drop zone will be injected here by JS -->
-        </main>
+            </main>
 
-        <!-- Aside: Critique Panel -->
         <aside id="critique-panel" style="grid-area: aside;" class="bg-white border border-[var(--border-color)] rounded-xl shadow-sm flex flex-col transition-default">
             <div id="critique-content" class="h-full p-5">
-                <!-- Critique will be injected here -->
-            </div>
+                </div>
         </aside>
 
     </div>
 
-    <!-- Paste JSON Modal -->
     <div id="modal-paste" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden" role="dialog" aria-modal="true">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6 animate-fade-in">
             <h3 class="text-lg font-bold text-purple-600">Paste JSON Content</h3>
@@ -195,7 +49,6 @@
         </div>
     </div>
     
-    <!-- Toast Notification -->
     <div id="toast-notification" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white font-semibold py-2 px-5 rounded-full shadow-lg transition-transform duration-300 translate-y-20" role="alert">
         <p id="toast-message"></p>
     </div>
@@ -221,7 +74,6 @@
             statsDashboard: document.getElementById('stats-dashboard'),
             fileUpload: document.getElementById('file-upload'),
             pasteJsonBtn: document.getElementById('paste-json-btn'),
-            loadSampleBtn: document.getElementById('load-sample-btn'),
             pasteModal: {
                 container: document.getElementById('modal-paste'),
                 closeBtn: document.getElementById('modal-close-btn'),
@@ -235,9 +87,6 @@
             }
         };
 
-        // --- SAMPLE DATA ---
-        const sampleData = { "cases": [{ "id": "sample-1", "sourceText": "This is a matter of major importance.", "translationText": "This is a very important matter.", "revisionText": "This is a matter of great importance.", "diagnostics": [{ "persona": "The Stylist", "cause": "Resource Gap", "original_phrase": "'matter of major importance'", "explanation": "While `very important` is correct, `of great importance` better reflects the formal register of the source text. The word `major` carries a weight that `very` doesn't quite capture.", "target_phrase": "very important" }] }, { "id": "sample-2", "sourceText": "The company's quarterly earnings report surprised analysts, who had predicted a downturn.", "translationText": "The company's quarterly earnings report surprised analysts, they had predicted a downturn.", "revisionText": "The company's quarterly earnings report surprised analysts who had predicted a downturn.", "diagnostics": [{ "persona": "The Architect", "cause": "Process Discipline Failure", "original_phrase": "analysts, who had predicted", "explanation": "This is a comma splice, a common error when translating from languages where this structure is more permissible. English requires a proper conjunction or relative pronoun (`who`) to connect these clauses.", "target_phrase": "analysts, they" }] }, { "id": "sample-3", "sourceText": "He was over the moon about the promotion.", "translationText": "He was on the moon about the promotion.", "revisionText": "He was ecstatic about the promotion.", "diagnostics": [{ "persona": "The Analyst", "cause": "Knowledge Deficit", "original_phrase": "'over the moon'", "explanation": "The idiom `over the moon` means to be extremely happy. The translation `on the moon` is a literal misinterpretation and loses the intended meaning.", "target_phrase": "on the moon" }] }] };
-
         // --- INITIALIZATION ---
         function init() {
             setupEventListeners();
@@ -246,7 +95,6 @@
 
         function setupEventListeners() {
             dom.fileUpload.addEventListener('change', e => handleFile(e.target.files[0]));
-            dom.loadSampleBtn.addEventListener('click', () => processJsonData(JSON.stringify(sampleData)));
             
             // Modal listeners
             dom.pasteJsonBtn.addEventListener('click', () => toggleModal(true));
@@ -277,7 +125,7 @@
                 <div class="drop-zone h-full flex flex-col items-center justify-center text-center p-8 border-2 border-dashed border-slate-300 rounded-xl transition-default">
                     <svg class="w-16 h-16 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" /></svg>
                     <p class="mt-4 text-lg font-semibold text-slate-700">Start by loading your analysis file</p>
-                    <p class="mt-1 text-slate-500">Drag & drop, click "Load File", or use the sample data.</p>
+                    <p class="mt-1 text-slate-500">Drag & drop, click "Load File", or paste JSON content.</p>
                 </div>`;
             dom.critiqueContent.innerHTML = `<div class="h-full flex items-center justify-center text-center text-slate-400"><p>Critique panel is waiting for data...</p></div>`;
             dom.statsDashboard.classList.add('hidden');

@@ -1,0 +1,183 @@
+/*
+ * styles.css
+ *
+ * This file contains all the custom application styles for the Persona Translation Analyzer.
+ * It works in conjunction with tailwind.min.css (for utility classes) and fonts.css (for font definitions).
+*/
+
+:root {
+    --bg-color: #f8fafc; /* slate-50 */
+    --panel-bg-color: #ffffff;
+    --border-color: #e2e8f0; /* slate-200 */
+    --text-primary: #0f172a; /* slate-900 */
+    --text-secondary: #64748b; /* slate-500 */
+    --accent-analyst: #3b82f6; /* blue-500 */
+    --accent-architect: #f97316; /* orange-500 */
+    --accent-stylist: #16a34a; /* green-600 */
+    --highlight-bg: #fefce8; /* yellow-50 */
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    /*
+     * This is the primary font declaration. It calls the 'Inter' family defined in fonts.css.
+     * The browser will automatically use the font stack (Noto Sans SC -> Inter) for all text.
+    */
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.font-code {
+    font-family: 'Source Code Pro', monospace;
+}
+
+/* --- Custom Scrollbar --- */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: var(--border-color);
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* --- Layout & Panels --- */
+.app-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(380px, 1.5fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas:
+        "header header"
+        "main aside";
+    gap: 1.5rem;
+    height: 100vh;
+}
+#cases-list, #critique-panel {
+    overflow-y: auto;
+}
+
+@media (max-width: 1024px) {
+    .app-grid {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "header"
+            "main"
+            "aside";
+        height: auto;
+    }
+    #cases-list {
+        overflow-y: visible;
+        min-height: 300px;
+    }
+    #critique-panel {
+        position: sticky;
+        bottom: 0;
+        max-height: 50vh;
+        z-index: 30;
+        overflow-y: auto;
+    }
+}
+
+/* --- Active States & Highlighting --- */
+.case-card.is-active {
+    box-shadow: 0 0 0 2px var(--accent-analyst);
+    border-color: var(--accent-analyst);
+}
+.filter-active-analyst .case-card.is-active {
+    box-shadow: 0 0 0 2px var(--accent-analyst);
+    border-color: var(--accent-analyst);
+}
+.filter-active-architect .case-card.is-active {
+    box-shadow: 0 0 0 2px var(--accent-architect);
+    border-color: var(--accent-architect);
+}
+.filter-active-stylist .case-card.is-active {
+    box-shadow: 0 0 0 2px var(--accent-stylist);
+    border-color: var(--accent-stylist);
+}
+
+.case-card.is-filtered {
+    opacity: 0.4;
+    transition: opacity 0.3s;
+}
+.case-card.is-filtered:hover {
+    opacity: 1;
+}
+
+.diagnostic-highlight {
+    background-color: rgba(59, 130, 246, 0.1);
+    cursor: pointer;
+    border-radius: 3px;
+    padding: 0 2px;
+    transition: background-color 0.2s;
+}
+.diagnostic-highlight.is-active {
+    background-color: rgba(59, 130, 246, 0.25);
+    box-shadow: 0 0 0 2px var(--accent-analyst);
+}
+
+.diagnostic-card.is-active {
+    transform: scale(1.02);
+    box-shadow: 0 4px 15px -2px rgba(0,0,0,0.1);
+    border-color: var(--accent-analyst);
+}
+
+/* --- Persona Specific Colors & Elements --- */
+.persona-analyst { --persona-color: var(--accent-analyst); }
+.persona-architect { --persona-color: var(--accent-architect); }
+.persona-stylist { --persona-color: var(--accent-stylist); }
+
+.border-persona { border-left-color: var(--persona-color); }
+.text-persona { color: var(--persona-color); }
+.bg-persona { background-color: var(--persona-color); }
+
+.diag-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 9999px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.filter-active-analyst .diag-dot.persona-analyst,
+.filter-active-architect .diag-dot.persona-architect,
+.filter-active-stylist .diag-dot.persona-stylist {
+    transform: scale(1.5);
+    box-shadow: 0 0 0 2px var(--panel-bg-color), 0 0 0 4px var(--persona-color);
+}
+
+/* --- Transitions & Animations --- */
+.transition-default {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+    animation: fadeIn 0.4s both;
+}
+
+/* --- Drop Zone --- */
+.drop-zone.drag-over {
+    border-color: var(--accent-analyst);
+    background-color: #eff6ff; /* blue-50 */
+}
+
+/* --- Utility --- */
+.scroll-margin {
+    scroll-margin-top: 8rem;
+}
+

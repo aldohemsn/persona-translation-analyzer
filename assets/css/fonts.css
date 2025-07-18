@@ -1,0 +1,91 @@
+/*
+ * fonts.css
+ *
+ * This file establishes a robust, multi-language font stack for the analyzer.
+ * It prioritizes 'Noto Sans SC' for Chinese characters and falls back to 'Inter'
+ * for Latin and Latin-Extended characters (covering English, Spanish, etc.).
+ * This ensures optimal, native rendering for all supported languages.
+ *
+ * The browser will check for a character's glyph in the sources in the order they are declared
+ * for each font-weight.
+*/
+
+/* --- Regular (400) Weight --- */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  /* 1. Prioritize Noto Sans SC for Chinese glyphs */
+  src: url('../fonts/noto-sans-sc-v38-latin_latin-ext-regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  /* 2. Fallback to Inter for Latin/Spanish glyphs */
+  src: url('../fonts/inter-v19-latin_latin-ext-regular.woff2') format('woff2');
+}
+
+
+/* --- Medium (500) Weight --- */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  /* 1. Prioritize Noto Sans SC */
+  src: url('../fonts/noto-sans-sc-v38-latin_latin-ext-500.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  /* 2. Fallback to Inter */
+  src: url('../fonts/inter-v19-latin_latin-ext-500.woff2') format('woff2');
+}
+
+
+/* --- Semi-Bold (600) Weight --- */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  /* 1. Prioritize Noto Sans SC */
+  src: url('../fonts/noto-sans-sc-v38-latin_latin-ext-600.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  /* 2. Fallback to Inter */
+  src: url('../fonts/inter-v19-latin_latin-ext-600.woff2') format('woff2');
+}
+
+
+/* --- Bold (700) Weight --- */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  /* 1. Prioritize Noto Sans SC */
+  src: url('../fonts/noto-sans-sc-v38-latin_latin-ext-700.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  /* 2. Fallback to Inter */
+  src: url('../fonts/inter-v19-latin_latin-ext-700.woff2') format('woff2');
+}
+
