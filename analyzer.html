@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Persona Translation Analyzer v2.1</title>
+    <title>Persona Translation Analyzer v2.2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,6 +19,9 @@
             --accent-architect: #f97316; /* orange-500 */
             --accent-stylist: #16a34a; /* green-600 */
             --highlight-bg: #fefce8; /* yellow-50 */
+        }
+        html {
+            scroll-behavior: smooth;
         }
         body {
             font-family: 'Inter', sans-serif;
@@ -38,19 +41,35 @@
         /* --- Layout & Panels --- */
         .app-grid {
             display: grid;
-            grid-template-columns: 1fr 400px;
-            grid-template-rows: auto 1fr;
+            /* A more fluid grid for desktop: main content gets more space, side panel has a reasonable min/max */
+            grid-template-columns: minmax(0, 3fr) minmax(380px, 1.5fr);
+            grid-template-rows: auto minmax(0, 1fr);
             grid-template-areas: "header header" "main aside";
             gap: 1.5rem;
-            height: 100vh;
+            height: 100vh; /* Lock grid to viewport height on desktop */
         }
+        #cases-list, #critique-panel {
+            /* Ensure panels scroll independently on desktop */
+            overflow-y: auto;
+        }
+
         @media (max-width: 1024px) {
             .app-grid {
                 grid-template-columns: 1fr;
                 grid-template-areas: "header" "main" "aside";
-                height: auto;
+                height: auto; /* Let height be natural on mobile */
             }
-            #critique-panel { position: sticky; bottom: 0; }
+            #cases-list {
+                overflow-y: visible; /* Allow natural document flow on mobile */
+                min-height: 300px;
+            }
+            #critique-panel {
+                position: sticky;
+                bottom: 0;
+                max-height: 50vh; /* Give the sticky panel a max-height */
+                z-index: 30;
+                overflow-y: auto; /* The entire panel scrolls */
+            }
         }
         
         /* --- Active States & Highlighting --- */
@@ -131,14 +150,14 @@
         .scroll-margin { scroll-margin-top: 8rem; }
     </style>
 </head>
-<body class="overflow-hidden">
+<body>
 
     <div id="app" class="app-grid p-4 sm:p-6">
         
         <!-- App Header -->
         <header style="grid-area: header;" class="bg-white/80 backdrop-blur-lg border border-[var(--border-color)] rounded-xl shadow-sm p-4 sticky top-4 z-20">
             <div class="flex flex-wrap justify-between items-center gap-4">
-                <h1 class="text-xl font-bold text-slate-800">Persona Translation Analyzer <span class="font-normal text-lg text-slate-400">v2.1</span></h1>
+                <h1 class="text-xl font-bold text-slate-800">Persona Translation Analyzer <span class="font-normal text-lg text-slate-400">v2.2</span></h1>
                 <div id="controls" class="flex items-center gap-2">
                     <button id="load-sample-btn" class="px-3 py-1.5 text-sm font-semibold bg-emerald-500 text-white rounded-md hover:bg-emerald-600 transition-default">Load Sample</button>
                     <button id="paste-json-btn" class="px-3 py-1.5 text-sm font-semibold bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-default">Paste JSON</button>
@@ -153,13 +172,13 @@
         </header>
 
         <!-- Main Content: Cases List -->
-        <main id="cases-list" style="grid-area: main;" class="overflow-y-auto pr-2 -mr-2">
+        <main id="cases-list" style="grid-area: main;" class="pr-2 -mr-2">
             <!-- Initial state / Drop zone will be injected here by JS -->
         </main>
 
         <!-- Aside: Critique Panel -->
-        <aside id="critique-panel" style="grid-area: aside;" class="bg-white border border-[var(--border-color)] rounded-xl shadow-sm flex flex-col overflow-hidden transition-default lg:h-full">
-            <div id="critique-content" class="h-full overflow-y-auto p-5">
+        <aside id="critique-panel" style="grid-area: aside;" class="bg-white border border-[var(--border-color)] rounded-xl shadow-sm flex flex-col transition-default">
+            <div id="critique-content" class="h-full p-5">
                 <!-- Critique will be injected here -->
             </div>
         </aside>
@@ -291,7 +310,7 @@
                 ).join('');
 
                 return `
-                <div class="case-card scroll-margin bg-white border border-slate-200 rounded-xl shadow-sm mb-6 cursor-pointer transition-default" data-case-id="${caseData.id}">
+                <div id="case-card-${caseData.id}" class="case-card scroll-margin bg-white border border-slate-200 rounded-xl shadow-sm mb-6 cursor-pointer transition-default" data-case-id="${caseData.id}">
                     <div class="p-4 border-b border-slate-200 flex justify-between items-center">
                         <div class="flex items-center gap-3">
                             <h2 class="font-bold text-slate-800">Case ${index + 1}</h2>
@@ -458,12 +477,9 @@
                     state.activeCaseId = firstMatchingCase.id;
                     state.activeDiagnosticId = null; // Reset diagnostic focus
 
-                    // Use a timeout to ensure the DOM has updated with the new active classes
-                    // before we try to scroll. This prevents race conditions.
-                    setTimeout(() => {
-                        const targetCard = dom.casesList.querySelector(`.case-card[data-case-id="${firstMatchingCase.id}"]`);
-                        targetCard?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }, 50);
+                    const targetCard = document.getElementById(`case-card-${firstMatchingCase.id}`);
+                    targetCard?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
                 } else {
                     // No matches found, clear active case
                     state.activeCaseId = null;
