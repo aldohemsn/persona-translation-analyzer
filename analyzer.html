@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Persona Translation Analyzer (v11)</title>
+    <title>Interactive Persona Translation Analyzer (v14)</title>
     <!-- TailwindCSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Local Font Definitions -->
@@ -93,10 +93,10 @@
         /* Diagnostic Identifiers & Highlighting */
         .diag-identifier {
             display: inline-block;
-            width: 0.75rem; /* 12px */
-            height: 0.75rem; /* 12px */
+            width: 0.75rem;
+            height: 0.75rem;
             border-radius: 9999px;
-            margin-left: 0.375rem; /* 6px */
+            margin-left: 0.375rem;
             cursor: pointer;
             border: 1px solid rgba(0, 0, 0, 0.1);
             transition: all 0.2s ease-in-out;
@@ -111,7 +111,7 @@
             50% { box-shadow: 0 0 0 6px rgba(0, 0, 0, 0); }
         }
         .highlight-active {
-            outline: 2px solid #ef4444; /* red-500 */
+            outline: 2px solid #ef4444;
             outline-offset: 2px;
             box-shadow: 0 0 12px 2px rgba(239, 68, 68, 0.5);
             border-radius: 4px;
@@ -122,22 +122,17 @@
             position: absolute;
             top: 0.5rem;
             right: 0.5rem;
-            background-color: rgba(243, 244, 246, 0.7); /* gray-100 with opacity */
-            border: 1px solid #e5e7eb; /* gray-200 */
-            color: #4b5563; /* gray-600 */
-            border-radius: 0.375rem; /* rounded-md */
+            background-color: rgba(243, 244, 246, 0.7);
+            border: 1px solid #e5e7eb;
+            color: #4b5563;
+            border-radius: 0.375rem;
             padding: 0.25rem;
             opacity: 0;
             transition: opacity 0.2s, background-color 0.2s, color 0.2s;
             cursor: pointer;
         }
-        .table-cell:hover .copy-btn {
-            opacity: 1;
-        }
-        .copy-btn:hover {
-            background-color: #e5e7eb; /* gray-200 */
-            color: #1f2937; /* gray-800 */
-        }
+        .table-cell:hover .copy-btn { opacity: 1; }
+        .copy-btn:hover { background-color: #e5e7eb; color: #1f2937; }
 
         /* Toast Notification */
         #toast-notification {
@@ -148,44 +143,99 @@
             transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
             z-index: 2000;
         }
-        #toast-notification.show {
-            transform: translate(-50%, 0);
+        #toast-notification.show { transform: translate(-50%, 0); }
+
+        /* Header Collapse Styles */
+        #collapsible-header-content {
+            max-height: 500px;
+            visibility: visible;
+            opacity: 1;
+            transition: max-height 0.4s ease-in-out, opacity 0.3s ease-in-out, visibility 0.3s ease-in-out, margin-top 0.4s ease-in-out, padding-top 0.4s ease-in-out;
+        }
+        #main-header.header-collapsed #collapsible-header-content {
+            max-height: 0;
+            opacity: 0;
+            visibility: hidden;
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+            pointer-events: none;
+        }
+        #main-header.header-collapsed #collapse-icon { transform: rotate(180deg); }
+
+        /* --- MODIFIED: Floating Controls Style --- */
+        #floating-controls {
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            opacity: 0.6; /* Default less intrusive state */
+            transform-origin: bottom right;
+        }
+        #floating-controls:hover {
+            opacity: 1;
+            transform: scale(1.03); /* Slight zoom on hover */
         }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 leading-relaxed">
 
+    <!-- MODIFIED: Floating Controls moved to bottom-right and made more compact -->
+    <div id="floating-controls" class="hidden lg:flex fixed bottom-4 right-4 z-30 bg-white/70 backdrop-blur-sm p-2 rounded-xl shadow-lg border border-gray-200/50 flex-col gap-3">
+        <div class="flex items-center justify-between w-36">
+            <span class="text-sm font-medium text-gray-700">Diagnostics</span>
+            <label for="error-toggle-desktop" class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="error-toggle-desktop" class="sr-only toggle-checkbox" checked>
+                <div class="toggle-label w-11 h-6 bg-gray-300 rounded-full transition-colors duration-300 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-transform after:duration-300"></div>
+            </label>
+        </div>
+        <div class="flex items-center justify-between w-36">
+            <span class="text-sm font-medium text-gray-700">Revision</span>
+            <label for="revision-toggle-desktop" class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="revision-toggle-desktop" class="sr-only toggle-checkbox">
+                <div class="toggle-label w-11 h-6 bg-gray-300 rounded-full transition-colors duration-300 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-transform after:duration-300"></div>
+            </label>
+        </div>
+    </div>
+
     <div id="app" class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-        <header class="bg-white p-4 rounded-xl shadow-lg sticky top-4 z-20 border border-gray-200">
-            <div class="flex flex-wrap justify-between items-center gap-4 mb-4">
-                <h1 class="text-xl md:text-2xl font-bold text-gray-900">Persona Translation Analyzer</h1>
-                <div class="flex items-center space-x-2 sm:space-x-4">
-                    <div class="flex items-center space-x-3 sm:space-x-6 border-r border-gray-300 pr-3 sm:pr-6 mr-1 sm:mr-2">
-                        <div class="flex items-center">
-                            <span class="text-sm font-medium text-gray-700 mr-2 sm:mr-3">Diagnostics</span>
-                            <label for="error-toggle" class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="error-toggle" class="sr-only toggle-checkbox" checked>
-                                <div class="toggle-label w-11 h-6 bg-gray-300 rounded-full transition-colors duration-300 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-transform after:duration-300"></div>
-                            </label>
+        <header id="main-header" class="bg-white rounded-xl shadow-lg sticky top-4 z-20 border border-gray-200">
+            <div class="p-4">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-xl md:text-2xl font-bold text-gray-900">Persona Translation Analyzer</h1>
+                    <button id="collapse-header-btn" title="Toggle Panel" class="p-2 -m-2 rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors">
+                        <svg id="collapse-icon" class="w-6 h-6 text-gray-600 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                    </button>
+                </div>
+                <div id="collapsible-header-content" class="overflow-hidden">
+                    <div class="flex flex-wrap justify-between items-center gap-4 mt-4">
+                        <!-- Toggles for Mobile/Tablet, hidden on desktop -->
+                        <div class="flex lg:hidden items-center space-x-3 sm:space-x-6 border-r border-gray-300 pr-3 sm:pr-6 mr-1 sm:mr-2">
+                            <div class="flex items-center">
+                                <span class="text-sm font-medium text-gray-700 mr-2 sm:mr-3">Diagnostics</span>
+                                <label for="error-toggle-mobile" class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="error-toggle-mobile" class="sr-only toggle-checkbox" checked>
+                                    <div class="toggle-label w-11 h-6 bg-gray-300 rounded-full transition-colors duration-300 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-transform after:duration-300"></div>
+                                </label>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="text-sm font-medium text-gray-700 mr-2 sm:mr-3">Revision</span>
+                                <label for="revision-toggle-mobile" class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="revision-toggle-mobile" class="sr-only toggle-checkbox">
+                                    <div class="toggle-label w-11 h-6 bg-gray-300 rounded-full transition-colors duration-300 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-transform after:duration-300"></div>
+                                </label>
+                            </div>
                         </div>
-                        <div class="flex items-center">
-                            <span class="text-sm font-medium text-gray-700 mr-2 sm:mr-3">Revision</span>
-                            <label for="revision-toggle" class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="revision-toggle" class="sr-only toggle-checkbox">
-                                <div class="toggle-label w-11 h-6 bg-gray-300 rounded-full transition-colors duration-300 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-transform after:duration-300"></div>
-                            </label>
+
+                        <div class="flex items-center space-x-2 sm:space-x-4 ml-auto">
+                            <button id="reset-btn" class="hidden bg-gray-200 text-gray-700 px-3 py-2 rounded-lg font-semibold text-sm hover:bg-gray-300 active:bg-gray-400 transition-all">Reset</button>
+                            <button id="paste-json-btn" class="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-purple-700 active:bg-purple-800 transition-all">Paste JSON</button>
+                            <label for="file-upload" class="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-blue-700 active:bg-blue-800 transition-all">Load File</label>
+                            <input type="file" id="file-upload" class="hidden" accept=".json">
                         </div>
                     </div>
-                    <button id="reset-btn" class="hidden bg-gray-200 text-gray-700 px-3 py-2 rounded-lg font-semibold text-sm hover:bg-gray-300 active:bg-gray-400 transition-all">Reset</button>
-                    <button id="paste-json-btn" class="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-purple-700 active:bg-purple-800 transition-all">Paste JSON</button>
-                    <label for="file-upload" class="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-blue-700 active:bg-blue-800 transition-all">Load File</label>
-                    <input type="file" id="file-upload" class="hidden" accept=".json">
+                    <div id="legend" class="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-2 text-sm mt-4 border-t border-gray-200 pt-4">
+                        <div class="flex items-center"><span class="ribbon ribbon-analyst cursor-pointer hover:brightness-110" data-modal-target="modal-analyst">The Analyst</span><span id="stat-analyst" class="ml-2 text-gray-600 font-medium">(0)</span></div>
+                        <div class="flex items-center"><span class="ribbon ribbon-architect cursor-pointer hover:brightness-110" data-modal-target="modal-architect">The Architect</span><span id="stat-architect" class="ml-2 text-gray-600 font-medium">(0)</span></div>
+                        <div class="flex items-center"><span class="ribbon ribbon-stylist cursor-pointer hover:brightness-110" data-modal-target="modal-stylist">The Stylist</span><span id="stat-stylist" class="ml-2 text-gray-600 font-medium">(0)</span></div>
+                    </div>
                 </div>
-            </div>
-            <div id="legend" class="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-2 text-sm">
-                <div class="flex items-center"><span class="ribbon ribbon-analyst cursor-pointer hover:brightness-110" data-modal-target="modal-analyst">The Analyst</span><span id="stat-analyst" class="ml-2 text-gray-600 font-medium">(0)</span></div>
-                <div class="flex items-center"><span class="ribbon ribbon-architect cursor-pointer hover:brightness-110" data-modal-target="modal-architect">The Architect</span><span id="stat-architect" class="ml-2 text-gray-600 font-medium">(0)</span></div>
-                <div class="flex items-center"><span class="ribbon ribbon-stylist cursor-pointer hover:brightness-110" data-modal-target="modal-stylist">The Stylist</span><span id="stat-stylist" class="ml-2 text-gray-600 font-medium">(0)</span></div>
             </div>
         </header>
 
@@ -196,7 +246,7 @@
         </main>
     </div>
     
-    <!-- Modals -->
+    <!-- Modals (unchanged) -->
     <div id="modal-analyst" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden opacity-0" role="dialog" aria-modal="true" aria-labelledby="modal-analyst-title">
         <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-md p-6 transform scale-95">
             <div class="flex items-start justify-between">
@@ -267,9 +317,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // --- CONFIG & STATE ---
-            const appConfig = {
-                toastDuration: 2000,
-            };
+            const appConfig = { toastDuration: 2000 };
             let diagnosisDataStore = {};
             let toastTimeout;
 
@@ -277,8 +325,6 @@
             const fileUpload = document.getElementById('file-upload');
             const casesContainer = document.getElementById('cases-container');
             const mainContent = document.getElementById('main-content');
-            const errorToggle = document.getElementById('error-toggle');
-            const revisionToggle = document.getElementById('revision-toggle');
             const globalTooltip = document.getElementById('global-tooltip');
             const resetBtn = document.getElementById('reset-btn');
             const pasteJsonBtn = document.getElementById('paste-json-btn');
@@ -286,15 +332,15 @@
             const jsonPasteArea = document.getElementById('json-paste-area');
             const loadPastedJsonBtn = document.getElementById('load-pasted-json-btn');
             const pasteErrorMsg = document.getElementById('paste-error-msg');
+            const mainHeader = document.getElementById('main-header');
+            const collapseHeaderBtn = document.getElementById('collapse-header-btn');
+            const errorToggleDesktop = document.getElementById('error-toggle-desktop');
+            const revisionToggleDesktop = document.getElementById('revision-toggle-desktop');
+            const errorToggleMobile = document.getElementById('error-toggle-mobile');
+            const revisionToggleMobile = document.getElementById('revision-toggle-mobile');
 
             // --- SAMPLE DATA ---
-            const sampleData = {
-                "cases": [
-                    { "id": "sample-1", "sourceText": "This is a matter of major importance.", "translationText": "This is a very important matter.", "revisionText": "This is a matter of great importance.", "diagnostics": [{ "persona": "The Stylist", "cause": "Resource Gap", "explanation": "While 'very important' is correct, 'of great importance' better reflects the formal register of the source text. 'Major' carries a weight that 'very' doesn't quite capture.", "target_phrase": "very important" }] },
-                    { "id": "sample-2", "sourceText": "The company's quarterly earnings report surprised analysts, who had predicted a downturn.", "translationText": "The company's quarterly earnings report surprised analysts, they had predicted a downturn.", "revisionText": "The company's quarterly earnings report surprised analysts who had predicted a downturn.", "diagnostics": [{ "persona": "The Architect", "cause": "Process Discipline Failure", "explanation": "This is a comma splice, a common error when translating from languages where this structure is more permissible. English requires a proper conjunction or relative pronoun ('who') to connect these clauses.", "target_phrase": "analysts, they" }] },
-                    { "id": "sample-3", "sourceText": "He was over the moon about the promotion.", "translationText": "He was on the moon about the promotion.", "revisionText": "He was ecstatic about the promotion.", "diagnostics": [{ "persona": "The Analyst", "cause": "Knowledge Deficit", "explanation": "The idiom 'over the moon' means to be extremely happy. The translation 'on the moon' is a literal misinterpretation and loses the intended meaning.", "target_phrase": "on the moon" }] }
-                ]
-            };
+            const sampleData = { "cases": [ { "id": "sample-1", "sourceText": "This is a matter of major importance.", "translationText": "This is a very important matter.", "revisionText": "This is a matter of great importance.", "diagnostics": [{ "persona": "The Stylist", "cause": "Resource Gap", "explanation": "While 'very important' is correct, 'of great importance' better reflects the formal register of the source text. 'Major' carries a weight that 'very' doesn't quite capture.", "target_phrase": "very important" }] }, { "id": "sample-2", "sourceText": "The company's quarterly earnings report surprised analysts, who had predicted a downturn.", "translationText": "The company's quarterly earnings report surprised analysts, they had predicted a downturn.", "revisionText": "The company's quarterly earnings report surprised analysts who had predicted a downturn.", "diagnostics": [{ "persona": "The Architect", "cause": "Process Discipline Failure", "explanation": "This is a comma splice, a common error when translating from languages where this structure is more permissible. English requires a proper conjunction or relative pronoun ('who') to connect these clauses.", "target_phrase": "analysts, they" }] }, { "id": "sample-3", "sourceText": "He was over the moon about the promotion.", "translationText": "He was on the moon about the promotion.", "revisionText": "He was ecstatic about the promotion.", "diagnostics": [{ "persona": "The Analyst", "cause": "Knowledge Deficit", "explanation": "The idiom 'over the moon' means to be extremely happy. The translation 'on the moon' is a literal misinterpretation and loses the intended meaning.", "target_phrase": "on the moon" }] } ] };
 
             // --- INITIALIZATION ---
             initApp();
@@ -307,40 +353,38 @@
             // --- EVENT LISTENERS ---
             function setupEventListeners() {
                 fileUpload.addEventListener('change', (e) => handleFile(e.target.files[0]));
-                errorToggle.addEventListener('change', () => mainContent.classList.toggle('errors-hidden', !errorToggle.checked));
-                revisionToggle.addEventListener('change', () => mainContent.classList.toggle('revision-hidden', !revisionToggle.checked));
+                
+                const syncToggles = (source, target) => { target.checked = source.checked; };
+
+                errorToggleDesktop.addEventListener('change', () => {
+                    syncToggles(errorToggleDesktop, errorToggleMobile);
+                    mainContent.classList.toggle('errors-hidden', !errorToggleDesktop.checked);
+                });
+                revisionToggleDesktop.addEventListener('change', () => {
+                    syncToggles(revisionToggleDesktop, revisionToggleMobile);
+                    mainContent.classList.toggle('revision-hidden', !revisionToggleDesktop.checked);
+                });
+                errorToggleMobile.addEventListener('change', () => {
+                    syncToggles(errorToggleMobile, errorToggleDesktop);
+                    mainContent.classList.toggle('errors-hidden', !errorToggleMobile.checked);
+                });
+                revisionToggleMobile.addEventListener('change', () => {
+                    syncToggles(revisionToggleMobile, revisionToggleDesktop);
+                    mainContent.classList.toggle('revision-hidden', !revisionToggleMobile.checked);
+                });
+
                 resetBtn.addEventListener('click', resetApp);
                 pasteJsonBtn.addEventListener('click', () => openModal(pasteModal));
                 loadPastedJsonBtn.addEventListener('click', handlePasteInput);
-                
-                // Modal Listeners
-                document.querySelectorAll('[data-modal-target]').forEach(trigger => {
-                    trigger.addEventListener('click', () => openModal(document.getElementById(trigger.getAttribute('data-modal-target'))));
-                });
-                document.querySelectorAll('.modal-close, .modal-overlay').forEach(closer => {
-                    closer.addEventListener('click', (event) => {
-                        if (event.target === closer) closeModal(closer.closest('.modal-overlay'));
-                    });
-                });
+                collapseHeaderBtn.addEventListener('click', () => mainHeader.classList.toggle('header-collapsed'));
+
+                document.querySelectorAll('[data-modal-target]').forEach(trigger => trigger.addEventListener('click', () => openModal(document.getElementById(trigger.getAttribute('data-modal-target')))));
+                document.querySelectorAll('.modal-close, .modal-overlay').forEach(closer => closer.addEventListener('click', (event) => { if (event.target === closer) closeModal(closer.closest('.modal-overlay')); }));
             }
 
             // --- CORE LOGIC ---
-
             function resetApp() {
-                casesContainer.innerHTML = `
-                    <div id="drop-zone" class="drop-zone text-center text-gray-500 py-16 border-2 border-dashed border-gray-300 rounded-xl transition-colors">
-                        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                        <p class="mt-4 text-lg font-medium">
-                            <strong class="text-purple-600 cursor-pointer" id="paste-link">Paste JSON content</strong>
-                            or drag & drop a file
-                        </p>
-                        <p class="mt-1">or <strong class="text-blue-600 cursor-pointer" id="upload-link">click here</strong> to select one</p>
-                        <div class="mt-8">
-                            <button id="load-sample-btn" class="bg-green-600 text-white px-5 py-2 rounded-lg font-semibold text-sm hover:bg-green-700 active:bg-green-800 transition-all">
-                                Or Load Sample Data
-                            </button>
-                        </div>
-                    </div>`;
+                casesContainer.innerHTML = `<div id="drop-zone" class="drop-zone text-center text-gray-500 py-16 border-2 border-dashed border-gray-300 rounded-xl transition-colors"><svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><p class="mt-4 text-lg font-medium"><strong class="text-purple-600 cursor-pointer" id="paste-link">Paste JSON content</strong> or drag & drop a file</p><p class="mt-1">or <strong class="text-blue-600 cursor-pointer" id="upload-link">click here</strong> to select one</p><div class="mt-8"><button id="load-sample-btn" class="bg-green-600 text-white px-5 py-2 rounded-lg font-semibold text-sm hover:bg-green-700 active:bg-green-800 transition-all">Or Load Sample Data</button></div></div>`;
                 
                 const dropZone = document.getElementById('drop-zone');
                 dropZone.addEventListener('click', (e) => {
@@ -358,6 +402,7 @@
                 document.getElementById('load-sample-btn').addEventListener('click', () => renderCases(sampleData.cases));
                 resetBtn.classList.add('hidden');
                 updateStats({ "The Analyst": 0, "The Architect": 0, "The Stylist": 0 });
+                mainHeader.classList.remove('header-collapsed');
             }
 
             function handleFile(file) {
@@ -377,34 +422,31 @@
                     pasteErrorMsg.classList.remove('hidden');
                     return;
                 }
-                const success = processJsonData(jsonString);
-                if (success) {
+                if (processJsonData(jsonString)) {
                     closeModal(pasteModal);
-                    jsonPasteArea.value = ''; // Clear textarea on success
+                    jsonPasteArea.value = '';
                     pasteErrorMsg.classList.add('hidden');
                 }
             }
             
             function processJsonData(jsonString) {
                 try {
-                    const data = JSON.parse(jsonString);
-                    if (!data.cases || !Array.isArray(data.cases)) {
-                        throw new Error("The JSON is missing a valid 'cases' array.");
-                    }
+                    const jsonMatch = jsonString.match(/```json\s*([\s\S]*?)\s*```/);
+                    const cleanedString = jsonMatch ? jsonMatch[1] : jsonString;
+                    const data = JSON.parse(cleanedString);
+                    if (!data.cases || !Array.isArray(data.cases)) throw new Error("The JSON is missing a valid 'cases' array.");
                     renderCases(data.cases);
-                    return true; // Indicate success
+                    return true;
                 } catch (error) {
                     const errorMessage = `Invalid JSON. ${error.message}`;
-                    // Check if the paste modal is open to show the error there
                     if (!pasteModal.classList.contains('hidden')) {
                         pasteErrorMsg.textContent = errorMessage;
                         pasteErrorMsg.classList.remove('hidden');
                     } else {
-                        // Show error in the main container if triggered from file upload
                         casesContainer.innerHTML = `<div class="text-center text-red-600 p-8 bg-red-50 rounded-lg"><p class="text-lg font-bold">Failed to parse data!</p><p class="mt-2">Please ensure the data is correctly formatted.</p><p class="text-sm mt-2 font-mono bg-red-100 inline-block px-2 py-1 rounded">Error: ${error.message}</p></div>`;
                     }
                     showToast('Failed to load data.', 'error');
-                    return false; // Indicate failure
+                    return false;
                 }
             }
 
@@ -417,45 +459,11 @@
 
                 cases.forEach((caseData, index) => {
                     const { html, mismatchCount } = annotateTranslation(caseData);
-                    
-                    (caseData.diagnostics || []).forEach(diag => {
-                        if (stats.hasOwnProperty(diag.persona)) {
-                            stats[diag.persona]++;
-                        }
-                    });
-                    
-                    const mismatchHtml = mismatchCount > 0 ? `<span class="text-xs font-normal text-amber-600 ml-auto" title="${mismatchCount} diagnostics had a 'target_phrase' that could not be precisely matched in the draft text and are therefore not highlighted.">${mismatchCount} items not matched</span>` : '';
-
-                    const diagnosticsIdentifiersHtml = (caseData.diagnostics || []).map(diag => {
-                        const bgColorClass = getPersonaBgClass(diag.persona);
-                        return `<span class="diag-identifier ${bgColorClass}" data-highlight-target="${diag.id}" title="${diag.persona}: ${diag.cause}"></span>`;
-                    }).join('');
-                    
+                    (caseData.diagnostics || []).forEach(diag => { if (stats.hasOwnProperty(diag.persona)) stats[diag.persona]++; });
+                    const mismatchHtml = mismatchCount > 0 ? `<span class="text-xs font-normal text-amber-600 ml-auto" title="${mismatchCount} diagnostics had a 'target_phrase' that could not be precisely matched and are not highlighted.">${mismatchCount} items not matched</span>` : '';
+                    const diagnosticsIdentifiersHtml = (caseData.diagnostics || []).map(diag => `<span class="diag-identifier ${getPersonaBgClass(diag.persona)}" data-highlight-target="${diag.id}" title="${diag.persona}: ${diag.cause}"></span>`).join('');
                     const caseId = `case-${index + 1}`;
-                    allCasesHtml += `
-                        <div class="case-block bg-white border-b border-gray-200 last:border-b-0">
-                            <div class="p-4 border-b border-gray-200">
-                                <h2 class="text-xl font-bold text-gray-800 flex items-center">
-                                    <span>Case ${index + 1}</span>
-                                    <div class="flex items-center ml-4">${diagnosticsIdentifiersHtml}</div>
-                                    ${mismatchHtml}
-                                </h2>
-                            </div>
-                            <div class="table-grid">
-                                <div class="table-cell font-bold text-lg bg-gray-50 text-gray-900 hidden md:block">Source Text</div>
-                                <div class="table-cell font-bold text-lg bg-gray-50 text-gray-900 hidden md:block">Draft Translation</div>
-                                <div class="table-cell font-bold text-lg bg-gray-50 text-gray-900 hidden md:block revision-cell">Revised Text</div>
-                                
-                                <div class="table-cell table-header md:hidden">Source Text</div>
-                                <div class="table-cell" data-text-id="${caseId}-source">${escapeHtml(caseData.sourceText || '')}</div>
-                                
-                                <div class="table-cell table-header md:hidden">Draft Translation</div>
-                                <div class="table-cell" data-text-id="${caseId}-draft">${html}</div>
-
-                                <div class="table-cell table-header md:hidden revision-cell">Revised Text</div>
-                                <div class="table-cell revision-cell" data-text-id="${caseId}-revision">${escapeHtml(caseData.revisionText || '')}</div>
-                            </div>
-                        </div>`;
+                    allCasesHtml += `<div class="case-block bg-white border-b border-gray-200 last:border-b-0"><div class="p-4 border-b border-gray-200"><h2 class="text-xl font-bold text-gray-800 flex items-center"><span>Case ${index + 1}</span><div class="flex items-center ml-4">${diagnosticsIdentifiersHtml}</div>${mismatchHtml}</h2></div><div class="table-grid"><div class="table-cell font-bold text-lg bg-gray-50 text-gray-900 hidden md:block">Source Text</div><div class="table-cell font-bold text-lg bg-gray-50 text-gray-900 hidden md:block">Draft Translation</div><div class="table-cell font-bold text-lg bg-gray-50 text-gray-900 hidden md:block revision-cell">Revised Text</div><div class="table-cell table-header md:hidden">Source Text</div><div class="table-cell" data-text-id="${caseId}-source">${escapeHtml(caseData.sourceText || '')}</div><div class="table-cell table-header md:hidden">Draft Translation</div><div class="table-cell" data-text-id="${caseId}-draft">${html}</div><div class="table-cell table-header md:hidden revision-cell">Revised Text</div><div class="table-cell revision-cell" data-text-id="${caseId}-revision">${escapeHtml(caseData.revisionText || '')}</div></div></div>`;
                 });
                 
                 casesContainer.innerHTML = allCasesHtml || `<div class="text-center text-gray-500 py-16"><p class="text-lg">No valid cases found.</p></div>`;
@@ -463,91 +471,42 @@
                 updateStats(stats);
                 setupDynamicListeners();
                 
-                mainContent.classList.remove('errors-hidden');
-                errorToggle.checked = true;
+                mainContent.classList.remove('errors-hidden', 'revision-hidden');
                 mainContent.classList.add('revision-hidden');
-                revisionToggle.checked = false;
+                errorToggleDesktop.checked = true;
+                errorToggleMobile.checked = true;
+                revisionToggleDesktop.checked = false;
+                revisionToggleMobile.checked = false;
+                mainHeader.classList.remove('header-collapsed');
             }
 
             function annotateTranslation(caseData) {
                 const text = caseData.translationText || '';
                 const diagnostics = caseData.diagnostics || [];
-                if (!text || diagnostics.length === 0) {
-                    return { html: escapeHtml(text), mismatchCount: 0 };
-                }
+                if (!text || diagnostics.length === 0) return { html: escapeHtml(text), mismatchCount: 0 };
 
-                diagnostics.forEach((diag, index) => {
-                    diag.id = `diag-${caseData.id || crypto.randomUUID()}-${index}`;
-                    diagnosisDataStore[diag.id] = diag;
-                });
-
-                const annotations = diagnostics.map(anno => {
-                    if (!anno.target_phrase) return null;
-                    const startIndex = text.indexOf(anno.target_phrase);
-                    if (startIndex === -1) return null;
-                    return { ...anno, startIndex, endIndex: startIndex + anno.target_phrase.length };
-                }).filter(Boolean);
-
+                diagnostics.forEach((diag, index) => { diag.id = `diag-${caseData.id || crypto.randomUUID()}-${index}`; diagnosisDataStore[diag.id] = diag; });
+                const annotations = diagnostics.map(anno => { if (!anno.target_phrase) return null; const startIndex = text.indexOf(anno.target_phrase); if (startIndex === -1) return null; return { ...anno, startIndex, endIndex: startIndex + anno.target_phrase.length }; }).filter(Boolean);
                 const mismatchCount = diagnostics.length - annotations.length;
                 const points = new Set([0, text.length]);
-                annotations.forEach(anno => {
-                    points.add(anno.startIndex);
-                    points.add(anno.endIndex);
-                });
+                annotations.forEach(anno => { points.add(anno.startIndex); points.add(anno.endIndex); });
                 const sortedPoints = Array.from(points).sort((a, b) => a - b);
-
                 let htmlParts = [];
                 for (let i = 0; i < sortedPoints.length - 1; i++) {
-                    const start = sortedPoints[i];
-                    const end = sortedPoints[i + 1];
+                    const start = sortedPoints[i], end = sortedPoints[i + 1];
                     if (start >= end) continue;
-
                     let segmentHtml = escapeHtml(text.substring(start, end));
-                    const activeAnnotations = annotations
-                        .filter(anno => anno.startIndex <= start && anno.endIndex >= end)
-                        .sort((a, b) => (b.endIndex - b.startIndex) - (a.endIndex - a.startIndex));
-                    
-                    activeAnnotations.forEach(anno => {
-                        const ribbonClass = getRibbonClass(anno.persona);
-                        segmentHtml = `<span class="ribbon ${ribbonClass}" data-tooltip-id="${anno.id}">${segmentHtml}</span>`;
-                    });
+                    const activeAnnotations = annotations.filter(anno => anno.startIndex <= start && anno.endIndex >= end).sort((a, b) => (b.endIndex - b.startIndex) - (a.endIndex - a.startIndex));
+                    activeAnnotations.forEach(anno => { segmentHtml = `<span class="ribbon ${getRibbonClass(anno.persona)}" data-tooltip-id="${anno.id}">${segmentHtml}</span>`; });
                     htmlParts.push(segmentHtml);
                 }
-
                 return { html: htmlParts.join(''), mismatchCount };
             }
 
-            // --- DYNAMIC LISTENERS & UI UPDATES ---
             function setupDynamicListeners() {
-                // Tooltips
-                document.querySelectorAll('.ribbon[data-tooltip-id]').forEach(ribbon => {
-                    ribbon.addEventListener('mouseenter', showTooltip);
-                    ribbon.addEventListener('mouseleave', hideTooltip);
-                    ribbon.addEventListener('mousemove', (e) => positionTooltip(e));
-                });
-
-                // Diagnostic Identifiers
-                document.querySelectorAll('.diag-identifier').forEach(identifier => {
-                    const targetId = identifier.getAttribute('data-highlight-target');
-                    const ribbon = document.querySelector(`.ribbon[data-tooltip-id="${targetId}"]`);
-                    if (ribbon) {
-                        identifier.addEventListener('mouseenter', () => ribbon.classList.add('highlight-active'));
-                        identifier.addEventListener('mouseleave', () => ribbon.classList.remove('highlight-active'));
-                    }
-                });
-
-                // Copy Buttons
-                document.querySelectorAll('.table-cell[data-text-id]').forEach(cell => {
-                    const copyButton = document.createElement('button');
-                    copyButton.className = 'copy-btn';
-                    copyButton.title = 'Copy to clipboard';
-                    copyButton.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>`;
-                    copyButton.addEventListener('click', () => {
-                        copyToClipboard(cell.innerText);
-                        showToast('Copied to clipboard!');
-                    });
-                    cell.appendChild(copyButton);
-                });
+                document.querySelectorAll('.ribbon[data-tooltip-id]').forEach(ribbon => { ribbon.addEventListener('mouseenter', showTooltip); ribbon.addEventListener('mouseleave', hideTooltip); ribbon.addEventListener('mousemove', (e) => positionTooltip(e)); });
+                document.querySelectorAll('.diag-identifier').forEach(identifier => { const targetId = identifier.getAttribute('data-highlight-target'); const ribbon = document.querySelector(`.ribbon[data-tooltip-id="${targetId}"]`); if (ribbon) { identifier.addEventListener('mouseenter', () => ribbon.classList.add('highlight-active')); identifier.addEventListener('mouseleave', () => ribbon.classList.remove('highlight-active')); } });
+                document.querySelectorAll('.table-cell[data-text-id]').forEach(cell => { const copyButton = document.createElement('button'); copyButton.className = 'copy-btn'; copyButton.title = 'Copy to clipboard'; copyButton.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>`; copyButton.addEventListener('click', () => { copyToClipboard(cell.innerText); showToast('Copied to clipboard!'); }); cell.appendChild(copyButton); });
             }
 
             function updateStats(stats) {
@@ -556,22 +515,13 @@
                 document.getElementById('stat-stylist').textContent = ` (${stats["The Stylist"]})`;
             }
 
-            // --- TOOLTIP & MODAL ---
             function showTooltip(event) {
                 if (mainContent.classList.contains('errors-hidden')) return;
                 const ribbon = event.target;
                 const tooltipId = ribbon.getAttribute('data-tooltip-id');
                 const diagData = diagnosisDataStore[tooltipId];
                 if (!diagData) return;
-
-                globalTooltip.innerHTML = `
-                    <div class="p-2">
-                        <div class="font-bold text-base mb-2 flex items-center">
-                            <span class="mr-2 px-2 py-0.5 rounded-md text-sm text-white ${getPersonaBgClass(diagData.persona)}">${escapeHtml(diagData.persona)}</span>
-                            <span class="text-gray-300">${escapeHtml(diagData.cause)}</span>
-                        </div>
-                        <p class="text-gray-200">${escapeHtml(diagData.explanation)}</p>
-                    </div>`;
+                globalTooltip.innerHTML = `<div class="p-2"><div class="font-bold text-base mb-2 flex items-center"><span class="mr-2 px-2 py-0.5 rounded-md text-sm text-white ${getPersonaBgClass(diagData.persona)}">${escapeHtml(diagData.persona)}</span><span class="text-gray-300">${escapeHtml(diagData.cause)}</span></div><p class="text-gray-200">${escapeHtml(diagData.explanation)}</p></div>`;
                 globalTooltip.style.visibility = 'visible';
                 globalTooltip.style.opacity = '1';
                 positionTooltip(event);
@@ -583,9 +533,7 @@
                 let left = event.clientX - (tooltip.offsetWidth / 2);
                 if (top < 10) top = event.clientY + 20;
                 if (left < 10) left = 10;
-                if (left + tooltip.offsetWidth > window.innerWidth) {
-                    left = window.innerWidth - tooltip.offsetWidth - 10;
-                }
+                if (left + tooltip.offsetWidth > window.innerWidth) left = window.innerWidth - tooltip.offsetWidth - 10;
                 tooltip.style.top = `${top}px`;
                 tooltip.style.left = `${left}px`;
             }
@@ -594,15 +542,10 @@
 
             function openModal(modal) {
                 if (!modal) return;
-                if (modal.id === 'modal-paste') {
-                    pasteErrorMsg.classList.add('hidden');
-                }
+                if (modal.id === 'modal-paste') pasteErrorMsg.classList.add('hidden');
                 document.body.classList.add('modal-open');
                 modal.classList.remove('hidden');
-                setTimeout(() => {
-                    modal.classList.remove('opacity-0');
-                    modal.querySelector('.modal-content').classList.remove('scale-95');
-                }, 10);
+                setTimeout(() => { modal.classList.remove('opacity-0'); modal.querySelector('.modal-content').classList.remove('scale-95'); }, 10);
             }
 
             function closeModal(modal) {
@@ -613,58 +556,11 @@
                 setTimeout(() => modal.classList.add('hidden'), 300);
             }
             
-            // --- UTILITIES ---
-            function getRibbonClass(persona) {
-                if (persona === "The Analyst") return "ribbon-analyst";
-                if (persona === "The Architect") return "ribbon-architect";
-                if (persona === "The Stylist") return "ribbon-stylist";
-                return "";
-            }
-
-            function getPersonaBgClass(persona) {
-                if (persona === "The Analyst") return "bg-blue-600";
-                if (persona === "The Architect") return "bg-amber-500";
-                if (persona === "The Stylist") return "bg-green-600";
-                return "bg-gray-600";
-            }
-
-            function escapeHtml(text) {
-                if (typeof text !== 'string') return '';
-                return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-            }
-
-            function showToast(message, type = 'success') {
-                const toast = document.getElementById('toast-notification');
-                const toastMessage = document.getElementById('toast-message');
-                
-                toastMessage.textContent = message;
-                toast.className = `bg-gray-900 text-white font-semibold py-2 px-5 rounded-full shadow-lg`; // Reset class
-                if (type === 'error') {
-                    toast.classList.replace('bg-gray-900', 'bg-red-600');
-                }
-                
-                toast.classList.add('show');
-                clearTimeout(toastTimeout);
-                toastTimeout = setTimeout(() => {
-                    toast.classList.remove('show');
-                }, appConfig.toastDuration);
-            }
-
-            function copyToClipboard(text) {
-                const textArea = document.createElement('textarea');
-                textArea.value = text;
-                textArea.style.position = 'fixed';
-                textArea.style.left = '-9999px';
-                document.body.appendChild(textArea);
-                textArea.focus();
-                textArea.select();
-                try {
-                    document.execCommand('copy');
-                } catch (err) {
-                    console.error('Fallback: Oops, unable to copy', err);
-                }
-                document.body.removeChild(textArea);
-            }
+            function getRibbonClass(persona) { if (persona === "The Analyst") return "ribbon-analyst"; if (persona === "The Architect") return "ribbon-architect"; if (persona === "The Stylist") return "ribbon-stylist"; return ""; }
+            function getPersonaBgClass(persona) { if (persona === "The Analyst") return "bg-blue-600"; if (persona === "The Architect") return "bg-amber-500"; if (persona === "The Stylist") return "bg-green-600"; return "bg-gray-600"; }
+            function escapeHtml(text) { if (typeof text !== 'string') return ''; return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
+            function showToast(message, type = 'success') { const toast = document.getElementById('toast-notification'); const toastMessage = document.getElementById('toast-message'); toastMessage.textContent = message; toast.className = `bg-gray-900 text-white font-semibold py-2 px-5 rounded-full shadow-lg`; if (type === 'error') toast.classList.replace('bg-gray-900', 'bg-red-600'); toast.classList.add('show'); clearTimeout(toastTimeout); toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, appConfig.toastDuration); }
+            function copyToClipboard(text) { const textArea = document.createElement('textarea'); textArea.value = text; textArea.style.position = 'fixed'; textArea.style.left = '-9999px'; document.body.appendChild(textArea); textArea.focus(); textArea.select(); try { document.execCommand('copy'); } catch (err) { console.error('Fallback: Oops, unable to copy', err); } document.body.removeChild(textArea); }
         });
     </script>
 </body>
