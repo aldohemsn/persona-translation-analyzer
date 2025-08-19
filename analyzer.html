@@ -6,687 +6,344 @@
     <title>Persona Translation Analyzer (Offline)</title>
     <link rel="stylesheet" href="./assets/css/tailwind.min.css">
     <link rel="stylesheet" href="./assets/css/fonts.css">
-
     <style>
-        /*
-         * styles.css
-         *
-         * This file contains all the custom application styles for the Persona Translation Analyzer.
-         * It works in conjunction with tailwind.min.css (for utility classes) and fonts.css (for font definitions).
-        */
-
+        /* This block contains all custom application styles. For production, this can be externalized to a styles.css file. */
         :root {
-            --bg-color: #f8fafc; /* slate-50 */
-            --panel-bg-color: #ffffff;
-            --border-color: #e2e8f0; /* slate-200 */
-            --text-primary: #0f172a; /* slate-900 */
-            --text-secondary: #64748b; /* slate-500 */
-            --accent-analyst: #3b82f6; /* blue-500 */
-            --accent-architect: #f97316; /* orange-500 */
-            --accent-stylist: #16a34a; /* green-600 */
-            --highlight-bg: #fefce8; /* yellow-50 */
+            --analyst-color: 99 102 241; /* indigo-500 */
+            --architect-color: 234 179 8; /* yellow-500 */
+            --stylist-color: 236 72 153; /* pink-500 */
+            --bg-color: #111827; /* gray-900 */
+            --panel-color: #1f2937; /* gray-800 */
+            --text-color: #d1d5db; /* gray-300 */
+            --border-color: #374151; /* gray-700 */
         }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
         body {
-            font-family: 'Inter', sans-serif;
             background-color: var(--bg-color);
-            color: var(--text-primary);
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
+            color: var(--text-color);
+            font-family: 'Inter', 'Noto Sans SC', sans-serif;
         }
-
-        .font-code {
-            font-family: 'Source Code Pro', monospace;
+        .font-noto {
+            font-family: 'Noto Sans SC', 'Inter', sans-serif;
         }
-
-        /* --- Custom Scrollbar --- */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: var(--border-color);
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-
-        /* --- Layout & Panels --- */
-        .app-grid {
-            display: grid;
-            grid-template-columns: minmax(0, 3fr) minmax(380px, 1.5fr);
-            grid-template-rows: auto minmax(0, 1fr);
-            grid-template-areas:
-                "header header"
-                "main aside";
-            gap: 1.5rem;
-            height: 100vh;
-        }
-        #cases-list, #critique-panel {
-            overflow-y: auto;
-        }
-
-        @media (max-width: 1024px) {
-            .app-grid {
-                grid-template-columns: 1fr;
-                grid-template-areas:
-                    "header"
-                    "main"
-                    "aside";
-                height: auto;
-            }
-            #cases-list {
-                overflow-y: visible;
-                min-height: 300px;
-            }
-            #critique-panel {
-                position: sticky;
-                bottom: 0;
-                max-height: 50vh;
-                z-index: 30;
-                overflow-y: auto;
-            }
-        }
-
-        /* --- Active States & Highlighting --- */
-        .case-card.is-active {
-            box-shadow: 0 0 0 2px var(--accent-analyst);
-            border-color: var(--accent-analyst);
-        }
-        .filter-active-analyst .case-card.is-active {
-            box-shadow: 0 0 0 2px var(--accent-analyst);
-            border-color: var(--accent-analyst);
-        }
-        .filter-active-architect .case-card.is-active {
-            box-shadow: 0 0 0 2px var(--accent-architect);
-            border-color: var(--accent-architect);
-        }
-        .filter-active-stylist .case-card.is-active {
-            box-shadow: 0 0 0 2px var(--accent-stylist);
-            border-color: var(--accent-stylist);
-        }
-
-        .case-card.is-filtered {
-            opacity: 0.4;
-            transition: opacity 0.3s;
-        }
-        .case-card.is-filtered:hover {
-            opacity: 1;
-        }
-
-        .diagnostic-highlight {
-            background-color: rgba(59, 130, 246, 0.1);
+        mark {
+            padding: 2px 4px;
+            border-radius: 4px;
+            color: white;
+            transition: all 0.2s ease-in-out;
             cursor: pointer;
-            border-radius: 3px;
-            padding: 0 2px;
-            transition: background-color 0.2s;
         }
-        .diagnostic-highlight.is-active {
-            background-color: rgba(59, 130, 246, 0.25);
-            box-shadow: 0 0 0 2px var(--accent-analyst);
-        }
-
-        .diagnostic-card.is-active {
-            transform: scale(1.02);
-            box-shadow: 0 4px 15px -2px rgba(0,0,0,0.1);
-            border-color: var(--accent-analyst);
-        }
-
-        /* --- Persona Specific Colors & Elements --- */
-        .persona-analyst { --persona-color: var(--accent-analyst); }
-        .persona-architect { --persona-color: var(--accent-architect); }
-        .persona-stylist { --persona-color: var(--accent-stylist); }
-
-        .border-persona { border-left-color: var(--persona-color); }
-        .text-persona { color: var(--persona-color); }
-        .bg-persona { background-color: var(--persona-color); }
-
-        .diag-dot {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 9999px;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .filter-active-analyst .diag-dot.persona-analyst,
-        .filter-active-architect .diag-dot.persona-architect,
-        .filter-active-stylist .diag-dot.persona-stylist {
-            transform: scale(1.5);
-            box-shadow: 0 0 0 2px var(--panel-bg-color), 0 0 0 4px var(--persona-color);
-        }
-
-        /* --- Transitions & Animations --- */
-        .transition-default {
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in {
-            animation: fadeIn 0.4s both;
-        }
-
-        /* --- Drop Zone --- */
-        .drop-zone.drag-over {
-            border-color: var(--accent-analyst);
-            background-color: #eff6ff; /* blue-50 */
-        }
+        mark.analyst { background-color: rgba(var(--analyst-color), 0.7); }
+        mark.architect { background-color: rgba(var(--architect-color), 0.7); }
+        mark.stylist { background-color: rgba(var(--stylist-color), 0.7); }
         
-        /* --- Collapsible Header --- */
-        header.is-collapsed #header-toggle-icon {
-            transform: rotate(-180deg);
+        .linked-highlight {
+            outline: 2px solid #facc15; /* yellow-400 */
+            box-shadow: 0 0 10px 3px rgba(250, 204, 21, 0.5);
+            border-radius: 4px;
+            transition: outline 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        mark.linked-highlight {
+            filter: brightness(1.5);
         }
 
-        /* --- Utility --- */
-        .scroll-margin {
-            scroll-margin-top: 8rem;
+        /* Filter styles */
+        .filter-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .filter-btn.active.analyst { background-color: rgb(var(--analyst-color)); color: white; }
+        .filter-btn.active.architect { background-color: rgb(var(--architect-color)); color: #111827; }
+        .filter-btn.active.stylist { background-color: rgb(var(--stylist-color)); color: white; }
+
+        body.filter-analyst mark:not(.analyst),
+        body.filter-architect mark:not(.architect),
+        body.filter-stylist mark:not(.stylist) {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+            outline: 1px dashed var(--border-color);
         }
 
-        #toast-notification {
-            position: fixed;
-            bottom: 1.5rem;
-            left: 50%;
-            transform: translateX(-50%) translateY(5rem);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        /* Collapsible Source Styles */
+        .source-content {
+            overflow: hidden;
+            transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out;
         }
+        .source-toggle-icon.collapsed {
+            transform: rotate(-90deg);
+        }
+        .source-content.collapsed {
+             max-height: 0 !important;
+             padding-top: 0 !important;
+             padding-bottom: 0 !important;
+             margin-top: 0 !important;
+        }
+
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-color); }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
     </style>
 </head>
-<body>
+<body class="overflow-hidden">
 
-    <div id="app" class="app-grid p-4 sm:p-6">
-        
-        <header id="main-header" style="grid-area: header;" class="bg-white/80 backdrop-blur-lg border border-[var(--border-color)] rounded-xl shadow-sm p-4 sticky top-4 z-20 transition-default">
-            <div class="flex flex-wrap justify-between items-center gap-4">
-                <div class="flex items-center gap-3">
-                    <h1 class="text-xl font-bold text-slate-800">Persona Translation Analyzer <span class="font-normal text-lg text-slate-400">v2.2.1-prod</span></h1>
-                    <button id="header-toggle-btn" class="flex items-center justify-center w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition-default" title="Toggle Filters Panel">
-                        <svg id="header-toggle-icon" class="w-5 h-5 transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                        </svg>
-                    </button>
-                </div>
-                <div id="controls" class="flex items-center gap-2">
-                    <button id="paste-json-btn" class="px-3 py-1.5 text-sm font-semibold bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-default">Paste JSON</button>
-                    <label for="file-upload" class="cursor-pointer px-3 py-1.5 text-sm font-semibold bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-default">Load File</label>
-                    <input type="file" id="file-upload" class="hidden" accept=".json">
-                </div>
+    <!-- Main Container -->
+    <div class="flex flex-col h-screen">
+        <!-- Header -->
+        <header class="flex-shrink-0 bg-gray-900/80 backdrop-blur-sm border-b border-gray-700 p-3 flex items-center justify-between z-20">
+            <!-- Left: Title -->
+            <div class="flex-shrink-0">
+                <h1 class="text-lg font-bold text-white">Persona Translation Analyzer</h1>
             </div>
-            <div id="collapsible-header" class="overflow-hidden transition-all duration-300 ease-in-out">
-                <div id="stats-dashboard" class="mt-4 pt-4 border-t border-[var(--border-color)] grid grid-cols-1 sm:grid-cols-4 gap-4 hidden">
-                     <h3 class="text-sm font-semibold text-slate-500 self-center hidden sm:block">FILTERS:</h3>
-                </div>
+            <!-- Center: Filters -->
+            <div id="filter-controls" class="flex-grow flex items-center justify-center space-x-2 md:space-x-3 px-4 hidden">
+                <button data-persona="analyst" class="filter-btn analyst px-3 py-1 text-sm font-semibold rounded-full border border-indigo-500 text-indigo-400 hover:bg-indigo-500 hover:text-white">Analyst</button>
+                <button data-persona="architect" class="filter-btn architect px-3 py-1 text-sm font-semibold rounded-full border border-yellow-500 text-yellow-400 hover:bg-yellow-500 hover:text-gray-900">Architect</button>
+                <button data-persona="stylist" class="filter-btn stylist px-3 py-1 text-sm font-semibold rounded-full border border-pink-500 text-pink-400 hover:bg-pink-500 hover:text-white">Stylist</button>
+            </div>
+            <!-- Right: Actions -->
+            <div class="flex-shrink-0 flex items-center space-x-3">
+                <input type="file" id="file-input" class="hidden">
+                <button id="load-file-btn" class="px-3 py-2 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors">Load File</button>
+                <button id="paste-json-btn" class="px-3 py-2 text-sm bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors">Paste JSON</button>
             </div>
         </header>
 
-        <main id="cases-list" style="grid-area: main;" class="pr-2 -mr-2">
-        </main>
-
-        <aside id="critique-panel" style="grid-area: aside;" class="bg-white border border-[var(--border-color)] rounded-xl shadow-sm flex flex-col transition-default">
-            <div id="critique-content" class="h-full p-5">
+        <!-- Main Content: Single Scrollable Report -->
+        <main id="report-container" class="flex-grow overflow-y-auto p-4">
+            <div id="welcome-message" class="text-center text-gray-400 p-8">
+                <p class="text-lg">No data loaded.</p>
+                <p class="mt-2 text-sm">Use the buttons in the header to load your analysis file.</p>
             </div>
-        </aside>
-
+        </main>
     </div>
 
-    <div id="modal-paste" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden" role="dialog" aria-modal="true">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6 animate-fade-in">
-            <h3 class="text-lg font-bold text-purple-600">Paste JSON Content</h3>
-            <p class="mt-1 text-sm text-slate-600">Paste the JSON content from the generator.</p>
-            <textarea id="json-paste-area" class="w-full h-64 mt-4 p-2 border border-slate-300 rounded-md font-code text-sm focus:ring-purple-500 focus:border-purple-500"></textarea>
-            <p id="paste-error-msg" class="text-red-600 text-sm mt-1 hidden"></p>
-            <div class="mt-4 flex justify-end gap-2">
-                <button id="modal-close-btn" class="px-4 py-2 text-sm font-semibold bg-slate-200 text-slate-700 rounded-md hover:bg-slate-300">Cancel</button>
-                <button id="load-pasted-json-btn" class="px-4 py-2 text-sm font-semibold bg-purple-600 text-white rounded-md hover:bg-purple-700">Load Content</button>
+    <!-- Modal for Pasting JSON -->
+    <div id="json-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
+        <div class="bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-2xl">
+            <h2 class="text-lg font-bold mb-4">Paste JSON Data</h2>
+            <textarea id="json-textarea" class="w-full h-64 bg-gray-900 text-gray-300 p-2 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+            <div class="mt-4 flex justify-end space-x-3">
+                <button id="cancel-paste-btn" class="px-4 py-2 bg-gray-600 rounded-md hover:bg-gray-700">Cancel</button>
+                <button id="submit-paste-btn" class="px-4 py-2 bg-indigo-600 rounded-md hover:bg-indigo-700">Load Data</button>
             </div>
         </div>
     </div>
-    
-    <div id="toast-notification" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white font-semibold py-2 px-5 rounded-full shadow-lg transition-transform duration-300 translate-y-20" role="alert">
-        <p id="toast-message"></p>
-    </div>
+
 
     <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // --- STATE MANAGEMENT ---
-        let state = {
-            cases: [],
-            diagnosticsMap: new Map(),
-            activeCaseId: null,
-            activeDiagnosticId: null,
-            activeFilter: null,
-            toastTimeout: null,
-            isHeaderCollapsed: false,
-        };
+        // DOM Elements
+        const fileInput = document.getElementById('file-input');
+        const loadFileBtn = document.getElementById('load-file-btn');
+        const pasteJsonBtn = document.getElementById('paste-json-btn');
+        const reportContainer = document.getElementById('report-container');
+        const welcomeMessage = document.getElementById('welcome-message');
+        const jsonModal = document.getElementById('json-modal');
+        const jsonTextarea = document.getElementById('json-textarea');
+        const cancelPasteBtn = document.getElementById('cancel-paste-btn');
+        const submitPasteBtn = document.getElementById('submit-paste-btn');
+        const filterControls = document.getElementById('filter-controls');
 
-        // --- DOM ELEMENT CACHE ---
-        const dom = {
-            app: document.getElementById('app'),
-            header: document.getElementById('main-header'),
-            headerToggleBtn: document.getElementById('header-toggle-btn'),
-            collapsibleHeader: document.getElementById('collapsible-header'),
-            casesList: document.getElementById('cases-list'),
-            critiquePanel: document.getElementById('critique-panel'),
-            critiqueContent: document.getElementById('critique-content'),
-            statsDashboard: document.getElementById('stats-dashboard'),
-            fileUpload: document.getElementById('file-upload'),
-            pasteJsonBtn: document.getElementById('paste-json-btn'),
-            pasteModal: {
-                container: document.getElementById('modal-paste'),
-                closeBtn: document.getElementById('modal-close-btn'),
-                loadBtn: document.getElementById('load-pasted-json-btn'),
-                textArea: document.getElementById('json-paste-area'),
-                errorMsg: document.getElementById('paste-error-msg'),
-            },
-            toast: {
-                container: document.getElementById('toast-notification'),
-                message: document.getElementById('toast-message'),
-            }
-        };
+        let analysisData = [];
 
-        // --- INITIALIZATION ---
-        function init() {
-            setupEventListeners();
-            renderInitialState();
-        }
+        // --- Event Listeners ---
+        loadFileBtn.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', handleFileLoad);
+        pasteJsonBtn.addEventListener('click', () => jsonModal.classList.remove('hidden'));
+        cancelPasteBtn.addEventListener('click', () => jsonModal.classList.add('hidden'));
+        submitPasteBtn.addEventListener('click', handlePasteSubmit);
+        filterControls.addEventListener('click', handleFilterClick);
 
-        function setupEventListeners() {
-            dom.fileUpload.addEventListener('change', e => handleFile(e.target.files[0]));
-            dom.headerToggleBtn.addEventListener('click', handleHeaderToggle);
-            
-            // Modal listeners
-            dom.pasteJsonBtn.addEventListener('click', () => toggleModal(true));
-            dom.pasteModal.closeBtn.addEventListener('click', () => toggleModal(false));
-            dom.pasteModal.container.addEventListener('click', (e) => { if (e.target === dom.pasteModal.container) toggleModal(false); });
-            dom.pasteModal.loadBtn.addEventListener('click', handlePasteInput);
-
-            // Main content listeners (delegated)
-            dom.casesList.addEventListener('click', handleCaseListClick);
-            dom.critiqueContent.addEventListener('click', handleCritiquePanelClick);
-            dom.statsDashboard.addEventListener('click', handleFilterClick);
-            
-            // Drag and Drop
-            const dropZone = dom.casesList;
-            dropZone.addEventListener('dragover', e => { e.preventDefault(); e.stopPropagation(); e.currentTarget.querySelector('.drop-zone')?.classList.add('drag-over'); });
-            dropZone.addEventListener('dragleave', e => { e.preventDefault(); e.stopPropagation(); e.currentTarget.querySelector('.drop-zone')?.classList.remove('drag-over'); });
-            dropZone.addEventListener('drop', e => {
-                e.preventDefault(); e.stopPropagation();
-                e.currentTarget.querySelector('.drop-zone')?.classList.remove('drag-over');
-                handleFile(e.dataTransfer.files[0]);
-            });
-        }
-
-        // --- UI RENDERING ---
-
-        function renderInitialState() {
-            dom.casesList.innerHTML = `
-                <div class="drop-zone h-full flex flex-col items-center justify-center text-center p-8 border-2 border-dashed border-slate-300 rounded-xl transition-default">
-                    <svg class="w-16 h-16 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" /></svg>
-                    <p class="mt-4 text-lg font-semibold text-slate-700">Start by loading your analysis file</p>
-                    <p class="mt-1 text-slate-500">Drag & drop, click "Load File", or paste JSON content.</p>
-                </div>`;
-            dom.critiqueContent.innerHTML = `<div class="h-full flex items-center justify-center text-center text-slate-400"><p>Critique panel is waiting for data...</p></div>`;
-            dom.statsDashboard.classList.add('hidden');
-            dom.collapsibleHeader.style.maxHeight = '0px';
-        }
+        // --- Data Handling and Rendering ---
         
-        function renderAll() {
-            renderCasesList();
-            renderCritiquePanel();
-            renderStatsDashboard();
-            updateActiveStates();
+        function renderMarkdown(text) {
+            if (!text) return '';
+            let safeText = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return safeText
+                .replace(/\n/g, '<br>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/_(.*?)_/g, '<em>$1</em>')
+                .replace(/&lt;mark/g, '<mark').replace(/&lt;\/mark&gt;/g, '</mark>')
+                .replace(/&gt;/g, '>');
         }
 
-        function renderCasesList() {
-            if (state.cases.length === 0) {
-                renderInitialState();
-                return;
-            }
-            const casesHtml = state.cases.map((caseData, index) => {
-                const { html, mismatchCount } = annotateTranslation(caseData);
-                const mismatchHtml = mismatchCount > 0 ? `<span class="text-xs font-medium text-amber-600" title="${mismatchCount} diagnostics had a 'target_phrase' that could not be matched.">${mismatchCount} unmatched</span>` : '';
-                
-                const diagnosticPersonas = new Set(caseData.diagnostics?.map(d => d.persona) || []);
-                const dotsHtml = Array.from(diagnosticPersonas).map(persona => 
-                    `<span class="diag-dot persona-${getPersonaClass(persona)} bg-persona" title="Focus on ${persona}" data-persona-focus="${persona}"></span>`
-                ).join('');
-
-                return `
-                <div id="case-card-${caseData.id}" class="case-card scroll-margin bg-white border border-slate-200 rounded-xl shadow-sm mb-6 transition-default" data-case-id="${caseData.id}">
-                    <div class="p-4 border-b border-slate-200 flex justify-between items-center cursor-pointer">
-                        <div class="flex items-center gap-3">
-                            <h2 class="font-bold text-slate-800">Case ${index + 1}</h2>
-                            <div class="flex items-center gap-1.5">${dotsHtml}</div>
-                        </div>
-                        ${mismatchHtml}
-                    </div>
-                    <div class="p-4 md:p-5 space-y-6 text-slate-700 leading-relaxed">
-                        <div>
-                            <h3 class="text-xs font-semibold uppercase text-slate-400 tracking-wider mb-2">Source</h3>
-                            <p>${escapeHtml(caseData.sourceText || '')}</p>
-                        </div>
-                        <div>
-                            <h3 class="text-xs font-semibold uppercase text-slate-400 tracking-wider mb-2">Draft Translation</h3>
-                            <p class="draft-text">${html}</p>
-                        </div>
-                        <div>
-                            <h3 class="text-xs font-semibold uppercase text-slate-400 tracking-wider mb-2">Revised Text</h3>
-                            <p class="text-slate-500">${escapeHtml(caseData.revisionText || '')}</p>
-                        </div>
-                    </div>
-                </div>`;
-            }).join('');
-            dom.casesList.innerHTML = casesHtml;
-        }
-        
-        function renderCritiquePanel() {
-            const activeCase = state.cases.find(c => c.id === state.activeCaseId);
-            if (!activeCase || !activeCase.diagnostics || activeCase.diagnostics.length === 0) {
-                dom.critiqueContent.innerHTML = `<div class="h-full flex items-center justify-center text-center text-slate-400 p-4"><p>Select a case to view its critique, or this case has no diagnostics.</p></div>`;
-                return;
-            }
-
-            const diagnosticsHtml = activeCase.diagnostics.map(diag => `
-                <div class="diagnostic-card persona-${getPersonaClass(diag.persona)} border-l-4 p-4 rounded-r-lg bg-slate-50/50 mb-4 cursor-pointer transition-default border-persona animate-fade-in" data-diagnostic-id="${diag.id}">
-                    <div class="flex justify-between items-center mb-2">
-                        <h4 class="font-bold text-persona">${diag.persona}</h4>
-                        <span class="text-xs font-semibold text-white bg-persona px-2 py-0.5 rounded-full">${diag.cause}</span>
-                    </div>
-                    <p class="text-sm text-slate-600">${renderMarkdown(diag.explanation)}</p>
-                    <p class="mt-3 text-xs text-slate-400 font-code border-t border-slate-200 pt-2">Source phrase: ${escapeHtml(diag.original_phrase)}</p>
-                </div>
-            `).join('');
-            dom.critiqueContent.innerHTML = diagnosticsHtml;
-        }
-        
-        function renderStatsDashboard() {
-            if (state.cases.length === 0) {
-                dom.statsDashboard.classList.add('hidden');
-                dom.collapsibleHeader.style.maxHeight = '0px';
-                return;
-            }
-            const stats = { "The Analyst": 0, "The Architect": 0, "The Stylist": 0 };
-            state.cases.forEach(c => c.diagnostics?.forEach(d => { if(stats.hasOwnProperty(d.persona)) stats[d.persona]++; }));
-
-            const statsHtml = Object.entries(stats).map(([persona, count]) => {
-                const personaClass = getPersonaClass(persona);
-                return `
-                <div class="stat-card persona-${personaClass} p-3 border-l-4 rounded-lg bg-slate-100/50 cursor-pointer transition-default border-persona" data-filter="${persona}">
-                    <p class="text-sm font-semibold text-slate-500">${persona}</p>
-                    <p class="text-2xl font-bold text-persona">${count}</p>
-                </div>`;
-            }).join('');
-            dom.statsDashboard.innerHTML = `<h3 class="text-sm font-semibold text-slate-500 self-center hidden sm:block">FILTERS:</h3>` + statsHtml;
-            dom.statsDashboard.classList.remove('hidden');
-
-            // Set max-height for animation
-            if (!state.isHeaderCollapsed) {
-                dom.collapsibleHeader.style.maxHeight = dom.collapsibleHeader.scrollHeight + "px";
-            }
-        }
-
-        function updateActiveStates() {
-            dom.app.classList.remove('filter-active-analyst', 'filter-active-architect', 'filter-active-stylist');
-            if (state.activeFilter) {
-                dom.app.classList.add(`filter-active-${getPersonaClass(state.activeFilter)}`);
-            }
-
-            document.querySelectorAll('.case-card').forEach(card => {
-                card.classList.toggle('is-active', card.dataset.caseId === state.activeCaseId);
-                const caseData = state.cases.find(c => c.id === card.dataset.caseId);
-                let isFiltered = false;
-                if (state.activeFilter) {
-                    isFiltered = !caseData.diagnostics?.some(d => d.persona === state.activeFilter);
-                }
-                card.classList.toggle('is-filtered', isFiltered);
-            });
-
-            document.querySelectorAll('.diagnostic-highlight').forEach(span => {
-                span.classList.toggle('is-active', span.dataset.diagnosticId === state.activeDiagnosticId);
-            });
-
-            document.querySelectorAll('.diagnostic-card').forEach(card => {
-                card.classList.toggle('is-active', card.dataset.diagnosticId === state.activeDiagnosticId);
-            });
-            
-            document.querySelectorAll('.stat-card').forEach(card => {
-                card.classList.toggle('bg-slate-200', card.dataset.filter === state.activeFilter);
-                card.classList.toggle('bg-slate-100/50', card.dataset.filter !== state.activeFilter);
-            });
-        }
-
-        // --- EVENT HANDLERS ---
-        function handleFile(file) {
-            if (!file || !file.type.match('json.*')) {
-                showToast('Please upload a valid JSON file.', 'error');
-                return;
-            }
+        function handleFileLoad(event) {
+            const file = event.target.files[0];
+            if (!file) return;
             const reader = new FileReader();
-            reader.onload = (e) => processJsonData(e.target.result);
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    processAndRenderData(data);
+                } catch (error) {
+                    alert('Error parsing JSON file. Please check the file format.');
+                    console.error('JSON Parse Error:', error);
+                }
+            };
             reader.readAsText(file);
         }
-        
-        function handlePasteInput() {
-            const jsonString = dom.pasteModal.textArea.value;
-            if (processJsonData(jsonString)) {
-                toggleModal(false);
-            }
-        }
 
-        function handleHeaderToggle() {
-            state.isHeaderCollapsed = !state.isHeaderCollapsed;
-            dom.header.classList.toggle('is-collapsed', state.isHeaderCollapsed);
-            if (state.isHeaderCollapsed) {
-                dom.collapsibleHeader.style.maxHeight = '0px';
-            } else {
-                dom.collapsibleHeader.style.maxHeight = dom.collapsibleHeader.scrollHeight + "px";
-            }
-        }
-
-        function handleCaseListClick(e) {
-            const caseCard = e.target.closest('.case-card');
-            if (!caseCard) return;
-
-            const highlightSpan = e.target.closest('.diagnostic-highlight');
-            const focusDot = e.target.closest('.diag-dot');
-
-            // 1. Set active case
-            state.activeCaseId = caseCard.dataset.caseId;
-            // 2. Render its critique panel
-            renderCritiquePanel();
-            // 3. Reset active diagnostic
-            state.activeDiagnosticId = null;
-
-            // 4. Determine which specific element was clicked and update active diagnostic
-            if (focusDot) {
-                const personaToFocus = focusDot.dataset.personaFocus;
-                const firstMatchingDiagnostic = state.cases
-                    .find(c => c.id === state.activeCaseId)
-                    ?.diagnostics?.find(d => d.persona === personaToFocus);
-                if (firstMatchingDiagnostic) {
-                    state.activeDiagnosticId = firstMatchingDiagnostic.id;
-                }
-            } else if (highlightSpan) {
-                state.activeDiagnosticId = highlightSpan.dataset.diagnosticId;
-            }
-
-            // 5. Scroll to the active diagnostic card if there is one
-            if (state.activeDiagnosticId) {
-                // Use a timeout to ensure the DOM is ready after renderCritiquePanel
-                setTimeout(() => {
-                    const diagnosticCard = dom.critiqueContent.querySelector(`[data-diagnostic-id="${state.activeDiagnosticId}"]`);
-                    diagnosticCard?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 50);
-            }
-
-            // 6. Update all UI states
-            updateActiveStates();
-        }
-
-        function handleCritiquePanelClick(e) {
-            const diagnosticCard = e.target.closest('.diagnostic-card');
-            if (diagnosticCard) {
-                state.activeDiagnosticId = diagnosticCard.dataset.diagnosticId;
-                updateActiveStates();
-                const highlightSpan = dom.casesList.querySelector(`[data-diagnostic-id="${state.activeDiagnosticId}"]`);
-                highlightSpan?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-        }
-        
-        function handleFilterClick(e) {
-            const filterCard = e.target.closest('.stat-card');
-            if (!filterCard) return;
-
-            const newFilter = filterCard.dataset.filter;
-            state.activeFilter = state.activeFilter === newFilter ? null : newFilter;
-
-            if (state.activeFilter) {
-                const firstMatchingCase = state.cases.find(c =>
-                    c.diagnostics?.some(d => d.persona === state.activeFilter)
-                );
-
-                if (firstMatchingCase) {
-                    state.activeCaseId = firstMatchingCase.id;
-                    state.activeDiagnosticId = null;
-
-                    const targetCard = document.getElementById(`case-card-${firstMatchingCase.id}`);
-                    targetCard?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-                } else {
-                    state.activeCaseId = null;
-                    state.activeDiagnosticId = null;
-                }
-            }
-            
-            renderCritiquePanel();
-            updateActiveStates();
-        }
-
-        // --- DATA PROCESSING ---
-        function processJsonData(jsonString) {
+        function handlePasteSubmit() {
+            const jsonString = jsonTextarea.value;
+            if (!jsonString) return;
             try {
-                const cleanedString = jsonString.replace(/```json\s*([\s\S]*?)\s*```/g, '$1').trim();
-                if (!cleanedString) throw new Error("Input is empty.");
-                const data = JSON.parse(cleanedString);
-                if (!data.cases || !Array.isArray(data.cases)) throw new Error("JSON must have a 'cases' array.");
-                
-                state.cases = data.cases;
-                state.diagnosticsMap.clear();
-                state.activeCaseId = data.cases.length > 0 ? data.cases[0].id : null;
-                state.activeDiagnosticId = null;
-                state.activeFilter = null;
-                state.isHeaderCollapsed = false; // Reset collapse state on new file
+                const data = JSON.parse(jsonString);
+                processAndRenderData(data);
+                jsonTextarea.value = '';
+                jsonModal.classList.add('hidden');
+            } catch (error) {
+                alert('Error parsing pasted JSON. Please check the format.');
+                console.error('JSON Parse Error:', error);
+            }
+        }
 
-                state.cases.forEach(caseData => {
-                    (caseData.diagnostics || []).forEach((diag, index) => {
-                        const uniqueId = `${caseData.id || crypto.randomUUID()}-diag-${index}`;
-                        diag.id = uniqueId;
-                        state.diagnosticsMap.set(uniqueId, diag);
-                    });
+        function processAndRenderData(data) {
+            analysisData = data;
+            welcomeMessage.classList.add('hidden');
+            filterControls.classList.remove('hidden');
+            reportContainer.innerHTML = ''; // Clear previous content
+            analysisData.forEach(caseData => {
+                const caseElement = createCaseElement(caseData);
+                reportContainer.appendChild(caseElement);
+            });
+        }
+
+        function createCaseElement(caseData) {
+            const element = document.createElement('div');
+            element.id = `case-${caseData.case_id}`;
+            element.className = 'border border-gray-700 bg-gray-800/50 rounded-lg mb-4 p-4 transition-all duration-300';
+            
+            const personasInCase = [...new Set(caseData.diagnostics.map(d => d.persona.toLowerCase()))];
+            
+            const sourceHTML = renderMarkdown(highlightText(caseData.source, caseData, 'source'));
+            const draftHTML = renderMarkdown(highlightText(caseData.draft, caseData, 'draft'));
+            const revisionHTML = renderMarkdown(highlightText(caseData.revision, caseData, 'revision'));
+
+            element.innerHTML = `
+                <header class="flex justify-between items-center pb-3 border-b border-gray-700">
+                    <h2 class="text-lg font-bold text-white">${caseData.case_id}</h2>
+                    <div class="flex space-x-2" title="Personas identified in this case">
+                        ${personasInCase.includes('analyst') ? '<div class="w-3 h-3 bg-indigo-500 rounded-full"></div>' : ''}
+                        ${personasInCase.includes('architect') ? '<div class="w-3 h-3 bg-yellow-500 rounded-full"></div>' : ''}
+                        ${personasInCase.includes('stylist') ? '<div class="w-3 h-3 bg-pink-500 rounded-full"></div>' : ''}
+                    </div>
+                </header>
+
+                <div class="source-container mt-4">
+                    <div class="source-header flex justify-between items-center cursor-pointer p-2 -mx-2 rounded-md hover:bg-gray-700/50">
+                        <h3 class="font-semibold text-gray-400">Source Text</h3>
+                        <svg class="source-toggle-icon w-5 h-5 text-gray-400 transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="source-content">
+                        <div class="source-text font-noto p-3 bg-gray-900/50 rounded-md mt-2">${sourceHTML}</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-base leading-relaxed mt-4">
+                    <div>
+                        <h3 class="font-semibold text-gray-400 mb-2">Draft</h3>
+                        <div class="draft-text font-noto p-3 bg-gray-900/50 rounded-md">${draftHTML}</div>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-400 mb-2">Revision</h3>
+                        <div class="revision-text font-noto p-3 bg-gray-900/50 rounded-md">${revisionHTML}</div>
+                    </div>
+                </div>
+            `;
+            
+            const sourceContent = element.querySelector('.source-content');
+            sourceContent.style.maxHeight = sourceContent.scrollHeight + 'px';
+
+            const sourceHeader = element.querySelector('.source-header');
+            const sourceIcon = element.querySelector('.source-toggle-icon');
+            sourceHeader.addEventListener('click', (e) => {
+                e.stopPropagation();
+                sourceContent.classList.toggle('collapsed');
+                sourceIcon.classList.toggle('collapsed');
+                if (!sourceContent.classList.contains('collapsed')) {
+                     sourceContent.style.maxHeight = sourceContent.scrollHeight + 'px';
+                }
+            });
+
+            element.querySelectorAll('.source-text mark, .draft-text mark, .revision-text mark').forEach(mark => {
+                mark.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const caseId = e.target.dataset.caseId;
+                    const diagIndex = e.target.dataset.diagnosticIndex;
+                    syncHighlights(caseId, diagIndex);
+                });
+            });
+
+            return element;
+        }
+
+        function highlightText(text, caseData, type) {
+            let highlightedText = text;
+            const sortedDiagnostics = caseData.diagnostics
+                .map((diag, index) => ({...diag, originalIndex: index}))
+                .sort((a, b) => {
+                    const segmentA = a[`${type}_segment`];
+                    const segmentB = b[`${type}_segment`];
+                    return (segmentB?.length || 0) - (segmentA?.length || 0);
                 });
 
-                renderAll();
-                dom.header.classList.remove('is-collapsed');
-                showToast(`Successfully loaded ${state.cases.length} cases.`);
-                return true;
-            } catch (error) {
-                const errorMessage = `Invalid JSON. ${error.message}`;
-                if (!dom.pasteModal.container.classList.contains('hidden')) {
-                    dom.pasteModal.errorMsg.textContent = errorMessage;
-                    dom.pasteModal.errorMsg.classList.remove('hidden');
-                }
-                showToast(errorMessage, 'error');
-                return false;
-            }
-        }
-
-        function annotateTranslation(caseData) {
-            const text = caseData.translationText || '';
-            const diagnostics = caseData.diagnostics || [];
-            if (!text || diagnostics.length === 0) return { html: escapeHtml(text), mismatchCount: 0 };
-
-            const annotations = diagnostics
-                .map(diag => {
-                    if (!diag.target_phrase) return null;
-                    const startIndex = text.indexOf(diag.target_phrase);
-                    if (startIndex === -1) return null;
-                    return { ...diag, startIndex, endIndex: startIndex + diag.target_phrase.length };
-                })
-                .filter(Boolean)
-                .sort((a,b) => a.startIndex - b.startIndex || (b.endIndex - b.startIndex) - (a.endIndex - a.startIndex));
-
-            const mismatchCount = diagnostics.length - annotations.length;
-            let lastIndex = 0;
-            let htmlParts = [];
-            
-            annotations.forEach(anno => {
-                if(anno.startIndex < lastIndex) return;
-                htmlParts.push(escapeHtml(text.substring(lastIndex, anno.startIndex)));
-                const personaClass = getPersonaClass(anno.persona);
-                htmlParts.push(`<span class="diagnostic-highlight persona-${personaClass}" data-diagnostic-id="${anno.id}">${escapeHtml(text.substring(anno.startIndex, anno.endIndex))}</span>`);
-                lastIndex = anno.endIndex;
+            sortedDiagnostics.forEach(diag => {
+                const segment = diag[`${type}_segment`];
+                if (!segment) return;
+                
+                const personaClass = diag.persona.toLowerCase();
+                const dataAttrs = `data-case-id="${caseData.case_id}" data-diagnostic-index="${diag.originalIndex}"`;
+                const replacementHtml = `<mark class="${personaClass}" ${dataAttrs}>${segment}</mark>`;
+                
+                const regex = new RegExp(segment.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + '(?![^<]*>|[^<>]*</mark>)', 'g');
+                highlightedText = highlightedText.replace(regex, replacementHtml);
             });
-            htmlParts.push(escapeHtml(text.substring(lastIndex)));
-
-            return { html: htmlParts.join(''), mismatchCount };
-        }
-
-        // --- UTILITIES ---
-        function toggleModal(show) {
-            if (show) {
-                dom.pasteModal.textArea.value = '';
-                dom.pasteModal.errorMsg.classList.add('hidden');
-                dom.pasteModal.container.classList.remove('hidden');
-            } else {
-                dom.pasteModal.container.classList.add('hidden');
-            }
-        }
-
-        function showToast(message, type = 'success') {
-            dom.toast.message.textContent = message;
-            dom.toast.container.classList.toggle('bg-red-600', type === 'error');
-            dom.toast.container.classList.toggle('bg-slate-900', type !== 'error');
-            dom.toast.container.classList.remove('translate-y-20');
-            clearTimeout(state.toastTimeout);
-            state.toastTimeout = setTimeout(() => {
-                dom.toast.container.classList.add('translate-y-20');
-            }, 3000);
+            return highlightedText;
         }
         
-        function getPersonaClass(persona) {
-            if (persona === "The Analyst") return "analyst";
-            if (persona === "The Architect") return "architect";
-            if (persona === "The Stylist") return "stylist";
-            return "default";
+        function syncHighlights(caseId, diagnosticIndex) {
+            document.querySelectorAll('.linked-highlight').forEach(el => el.classList.remove('linked-highlight'));
+
+            const caseElement = document.getElementById(`case-${caseId}`);
+            if (!caseElement || diagnosticIndex === null) return;
+
+            const sourceMark = caseElement.querySelector(`.source-text mark[data-diagnostic-index="${diagnosticIndex}"]`);
+            const draftMark = caseElement.querySelector(`.draft-text mark[data-diagnostic-index="${diagnosticIndex}"]`);
+            const revisionMark = caseElement.querySelector(`.revision-text mark[data-diagnostic-index="${diagnosticIndex}"]`);
+
+            sourceMark?.classList.add('linked-highlight');
+            draftMark?.classList.add('linked-highlight');
+            revisionMark?.classList.add('linked-highlight');
+
+            if (draftMark) {
+                draftMark.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } else if (sourceMark) {
+                sourceMark.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
         }
 
-        function escapeHtml(text) {
-            if (typeof text !== 'string') return '';
-            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-        }
+        function handleFilterClick(event) {
+            const button = event.target.closest('.filter-btn');
+            if (!button) return;
 
-        function renderMarkdown(text) {
-            if (typeof text !== 'string') return '';
-            let html = escapeHtml(text);
-            html = html.replace(/`(.*?)`/g, '<code class="font-code text-sm bg-slate-200/50 text-slate-800 px-1 py-0.5 rounded">$1</code>');
-            html = html.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
-            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
-            return html;
-        }
+            const persona = button.dataset.persona;
+            const body = document.body;
+            const filterClass = `filter-${persona}`;
 
-        // --- START THE APP ---
-        init();
-    });
+            if (button.classList.contains('active')) {
+                button.classList.remove('active');
+                body.classList.remove(filterClass);
+            } else {
+                filterControls.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    body.classList.remove(`filter-${btn.dataset.persona}`);
+                });
+                button.classList.add('active');
+                body.classList.add(filterClass);
+            }
+        }
     </script>
 </body>
 </html>

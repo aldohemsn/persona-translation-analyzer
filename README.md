@@ -1,4 +1,3 @@
-
 # Persona Translation Analyzer
 
 A sophisticated, client-side tool for AI-powered translation quality assessment, moving beyond literal accuracy to diagnose issues of style, structure, and nuance through a calibrated analytical framework.
@@ -22,17 +21,36 @@ Traditional translation analysis often focuses on grammatical correctness and li
 
 ## How It Works: A Streamlined Workflow
 
-The system has been refactored into two core components: a set of AI instructions and a powerful, standalone visualizer.
+The system consists of two core components: a set of AI instructions for data generation and a powerful, standalone visualizer for analysis.
 
 ### Step 1: AI-Powered Analysis
 
 The analysis is performed by a Large Language Model (e.g., Google's Gemini) that has been given a detailed system prompt.
 
-1.  **Input:** The user provides the AI with one or more translation "triptychs." Each triplet consists of the source text, a draft translation, and a final revised version.
+1.  **Input:** The user provides the AI with one or more translation "triptychs." Each consists of the source text, a draft translation, and a final revised version.
     
 2.  **Processing:** The AI, guided by the `ai_instruction_json_generation.md` prompt, analyzes the draft using the calibrated Analyst-Architect-Stylist framework.
     
-3.  **Output:** The AI generates a structured `JSON` object containing the detailed analysis, which the user then copies.
+3.  **Output:** The AI generates a structured `JSON` object. For each identified issue, the JSON captures a complete diagnostic triptych: the `source_segment`, the flawed `draft_segment`, and the corrected `revision_segment`.
+    
+    ```
+    [
+      {
+        "case_id": "CASE-001",
+        "source": "Full source text...",
+        "draft": "Full draft text...",
+        "revision": "Full revision text...",
+        "diagnostics": [
+          {
+            "persona": "Analyst",
+            "source_segment": "The specific, complete semantic unit from the source.",
+            "draft_segment": "The corresponding flawed segment from the draft.",
+            "revision_segment": "The corresponding corrected segment from the revision."
+          }
+        ]
+      }
+    ]
+    ```
     
 
 ### Step 2: Interactive Visualization (`analyzer.html`)
@@ -41,30 +59,30 @@ This tool is a rich, interactive, and fully responsive visualizer for the data p
 
 1.  **Input:** The user loads the `JSON` data, either by pasting it directly into the application or by loading a `.json` file.
     
-2.  **Visualization:** The tool renders a comprehensive and interactive report:
+2.  **Visualization:** The tool renders a comprehensive, single-view report:
     
-    -   **Two-Panel Layout:** A fluid, responsive layout presents the case list on the left and a dedicated, context-aware "Critique Panel" on the right.
+    -   **Unified Report Layout:** Eliminates panel-switching by presenting each case as a self-contained card in a single, scrollable view.
         
-    -   **Side-by-Side Comparison:** On larger screens, each case card displays the source, draft, and revision in a three-column format for immediate comparison.
+    -   **Side-by-Side Comparison:** Within each case, the **Draft** and **Revision** texts are placed directly next to each other for immediate, intuitive comparison.
         
-    -   **Interactive Diagnostics:** Clicking on a case, a highlighted phrase in the text, or a specific diagnostic card in the critique panel instantly focuses the relevant information across the entire interface.
+    -   **Collapsible Source Text:** The source text for each case is housed in a collapsible panel, ensuring it is always available as a reference without cluttering the view.
         
-    -   **Persona Filtering:** A header dashboard allows users to filter the entire report by persona, automatically scrolling to the first relevant case.
+    -   **Segment-to-Segment Highlighting:** Clicking on a highlighted issue in the **Source**, **Draft**, or **Revision** instantly highlights the corresponding segments in the other two columns, creating a tight analytical feedback loop.
         
-    -   **At-a-Glance Indicators:** Color-coded dots in each case header provide a quick visual map of the diagnostic types within, enhancing scannability when filtering.
+    -   **Global Persona Filtering:** A streamlined header bar allows users to filter the entire report by persona, instantly focusing the view on specific types of issues across all cases.
         
 
 ## Features
 
 -   **Deep, Nuanced Analysis:** Moves beyond simple error-checking to provide qualitative feedback on style and structure.
     
--   **Fully Interactive UI:** A dynamic, two-panel interface creates a seamless analytical workflow where all components are interconnected.
+-   **Intuitive Single-View UI:** A streamlined, single-report interface creates a seamless analytical workflow where all components are logically structured.
     
--   **Responsive Design:** The layout adapts gracefully to any screen size, from large desktop monitors to mobile devices, ensuring a polished experience.
+-   **Precise Cross-Highlighting:** Clicking an issue in one text area instantly highlights its counterpart in the others, linking cause and effect.
     
--   **Enhanced Readability:** A focus on clear typography, with increased font sizes and optimized line height, makes for comfortable long-form reading and analysis.
+-   **Robust Offline Capability:** The analyzer is a single HTML file that runs entirely in the browser with local assets, requiring no internet connection or complex setup.
     
--   **Client-Side Operation:** The analyzer runs entirely in the browser with no server-side dependencies or complex setup required.
+-   **Responsive Design:** The layout adapts gracefully to any screen size and zoom level, ensuring a consistent and polished experience.
     
 -   **Standardized Data Format:** The use of a structured `JSON` input provides a portable and consistent record of the analysis.
     
@@ -83,14 +101,14 @@ This tool is a rich, interactive, and fully responsive visualizer for the data p
     
     -   Open `analyzer.html` in a modern web browser.
         
-    -   Click "Paste JSON" to paste the content you copied, or save the content as a `.json` file and load it via the "Load File" button.
+    -   Click "Paste JSON" to paste the content you copied, or "Load File" to select a `.json` file.
         
     -   Review the interactive report.
         
 
 ## Building an Offline Production Version
 
-For use in isolated or secure environments, the `analyzer.html` tool can be made fully self-contained.
+For use in isolated or secure environments, the `analyzer.html` tool is designed to be fully self-contained.
 
 ### 1. Project Structure
 
@@ -108,45 +126,22 @@ Organize your files as follows:
 |   |   |-- (all .woff2 font files)
 ```
 
-### 2. Download Dependencies
+### 2. Dependencies
 
-The analyzer requires **Tailwind CSS** and the **Inter** & **Noto Sans SC** fonts.
-
--   **Tailwind CSS:** Download the pre-compiled `tailwind.min.css` file from the [official releases](https://github.com/tailwindlabs/tailwindcss/releases "null") and place it in `/assets/css/`.
-    
--   **Fonts:** Use a tool like [Google Webfonts Helper](https://gwfh.mranftl.com/fonts "null") to download the necessary font files (`.woff2` format).
-    
-    -   **Fonts to select:** `Inter` and `Noto Sans SC`.
-        
-    -   **Character sets:** `latin`, `latin-ext` (for Spanish/European languages), and `chinese-simplified`.
-        
-    -   **Organization:** Place all `.woff2` files in `/assets/fonts/`. Copy the CSS provided by the tool into `/assets/css/fonts.css`.
-        
+The analyzer requires **Tailwind CSS** and the **Inter** & **Noto Sans SC** fonts. For offline use, these must be downloaded and placed in the `/assets/` directory as structured above.
 
 ### 3. Create Local Stylesheets
 
 -   **`styles.css`:** Create this file in `/assets/css/`. Copy all CSS rules from the `<style>` block in `analyzer.html` and paste them into this new file.
     
--   **`fonts.css`:** Use the CSS content from the font download step. For optimal multi-language support, structure this file as a "font stack" that prioritizes `Noto Sans SC` for Chinese characters before falling back to `Inter` for Latin scripts.
+-   **`fonts.css`:** Use the CSS content generated by a tool like Google Webfonts Helper for your selected fonts.
     
 
-### 4. Update `analyzer.html`
+### 4. Link Local Assets in `analyzer.html`
 
-Modify the `<head>` of `analyzer.html` to link to your local, offline assets. Remove the CDN links and the inline `<style>` block.
+Modify the `<head>` of `analyzer.html` to link to your local, offline assets. Remove any CDN links and the inline `<style>` block.
 
-**Replace this:**
-
-```
-<script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
-<link rel="preconnect" href="[https://fonts.googleapis.com](https://fonts.googleapis.com)">
-<link rel="preconnect" href="[https://fonts.gstatic.com](https://fonts.gstatic.com)" crossorigin>
-<link href="[https://fonts.googleapis.com/css2?family=Inter...&display=swap](https://fonts.googleapis.com/css2?family=Inter...&display=swap)" rel="stylesheet">
-<style>
-    /* ... inline styles ... */
-</style>
-```
-
-**With this:**
+**Ensure your links are relative:**
 
 ```
 <link rel="stylesheet" href="./assets/css/tailwind.min.css">
@@ -154,4 +149,4 @@ Modify the `<head>` of `analyzer.html` to link to your local, offline assets. Re
 <link rel="stylesheet" href="./assets/css/styles.css">
 ```
 
-The resulting folder is now a fully portable, production-ready application that will run in any modern browser without an internet connection.
+The resulting `analyzer.html` is now a fully portable, production-ready application that will run in any modern browser without an internet connection.
