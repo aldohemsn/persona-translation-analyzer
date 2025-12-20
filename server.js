@@ -2,7 +2,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = process.env.PORT || 3003;
+const PORT = process.env.PORT || 3004;
 const SAMPLE_CASES_DIR = path.join(__dirname, 'sampleCases');
 
 // MIME types for static file serving
