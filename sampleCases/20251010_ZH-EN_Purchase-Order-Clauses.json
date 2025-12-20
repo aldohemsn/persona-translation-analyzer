@@ -1,0 +1,146 @@
+[
+  {
+    "case_id": "CASE-001",
+    "source": "1.原包装，来料不良供方包退换，环保要求符合ROHS指令，供方自需方收货之日起提供3年质保服务（有签定“质量保证协议”按协议执行）。",
+    "draft": "1. The supplier shall provide goods in the original package and accept return and replacement of defective incoming materials. It shall observe the environmental protection requirements as specified in ROHS directives. It shall provide a 3-year warranty service from the date of receipt by the purchaser (the “Quality Assurance Agreement”, if any, shall prevail).",
+    "revision": "1. Original packaging is required. The supplier shall accept returns and replace defective incoming materials, comply with the ROHS directive for environmental protection, and provide a three-year warranty starting from the date of receipt by the purchaser subject to any existing “Quality Assurance Agreement”.",
+    "diagnostics": [
+      {
+        "persona": "Architect",
+        "source_segment": "原包装",
+        "draft_segment": "The supplier shall provide goods in the original package",
+        "revision_segment": "Original packaging is required"
+      },
+      {
+        "persona": "Stylist",
+        "source_segment": "环保要求符合ROHS指令",
+        "draft_segment": "observe the environmental protection requirements as specified in ROHS directives",
+        "revision_segment": "comply with the ROHS directive for environmental protection"
+      },
+      {
+        "persona": "Stylist",
+        "source_segment": "（有签定“质量保证协议”按协议执行）",
+        "draft_segment": "(the “Quality Assurance Agreement”, if any, shall prevail)",
+        "revision_segment": "subject to any existing “Quality Assurance Agreement”"
+      }
+    ]
+  },
+  {
+    "case_id": "CASE-002",
+    "source": "2.送货到需方工厂，运费及保险费由供方承担。",
+    "draft": "2. The goods shall be delivered to the purchaser's factory with the freight and insurance premium borne by the supplier.",
+    "revision": "2. Delivery shall be made to the purchaser's factory, with all freight and insurance costs to be covered by the supplier.",
+    "diagnostics": [
+      {
+        "persona": "Architect",
+        "source_segment": "送货到需方工厂",
+        "draft_segment": "The goods shall be delivered to the purchaser's factory",
+        "revision_segment": "Delivery shall be made to the purchaser's factory"
+      },
+      {
+        "persona": "Stylist",
+        "source_segment": "运费及保险费由供方承担",
+        "draft_segment": "with the freight and insurance premium borne by the supplier",
+        "revision_segment": "with all freight and insurance costs to be covered by the supplier"
+      }
+    ]
+  },
+  {
+    "case_id": "CASE-003",
+    "source": "5. 供方所供应的货物,质量标准按照国家标准、行业标准、需方IQC验收标准执行。",
+    "draft": "5. The goods supplied by the supplier shall be of the quality specified in national standards, industry standards and IQC acceptance standards of the Purchaser.",
+    "revision": "5. The goods provided by the supplier must meet the quality standards set forth in national and industry standards, as well as the purchaser’s IQC acceptance criteria.",
+    "diagnostics": [
+      {
+        "persona": "Architect",
+        "source_segment": "质量标准按照...执行",
+        "draft_segment": "shall be of the quality specified in",
+        "revision_segment": "must meet the quality standards set forth in"
+      },
+      {
+        "persona": "Stylist",
+        "source_segment": "需方IQC验收标准",
+        "draft_segment": "IQC acceptance standards of the Purchaser",
+        "revision_segment": "the purchaser’s IQC acceptance criteria"
+      }
+    ]
+  },
+  {
+    "case_id": "CASE-004",
+    "source": "6.供方承诺有权对本订单产品所涉及的全部知识产权（含商标）进行授权及转授权。",
+    "draft": "6. The supplier acknowledges that it shall be entitled to license and sub-license all intellectual property rights (including trademarks) involved in the products of the order.",
+    "revision": "6. The supplier warrants that it has the right to license and sub-license all intellectual property rights (including trademarks) associated with the products specified in this order.",
+    "diagnostics": [
+      {
+        "persona": "Analyst",
+        "source_segment": "承诺",
+        "draft_segment": "acknowledges",
+        "revision_segment": "warrants"
+      },
+      {
+        "persona": "Architect",
+        "source_segment": "有权",
+        "draft_segment": "shall be entitled to",
+        "revision_segment": "has the right to"
+      },
+      {
+        "persona": "Stylist",
+        "source_segment": "本订单产品所涉及的",
+        "draft_segment": "involved in the products of the order",
+        "revision_segment": "associated with the products specified in this order"
+      }
+    ]
+  },
+  {
+    "case_id": "CASE-005",
+    "source": "7.由供方依据双方确认的对账单开具足额、符合规定的发票才能付款。",
+    "draft": "7. Payment can only be made after the supplier issues invoices in full amount and conforming to regulations according to the statement of account confirmed by the Parties.",
+    "revision": "7. Payment can only be made once the supplier duly issues full invoices according to the mutually confirmed statement of account.",
+    "diagnostics": [
+      {
+        "persona": "Stylist",
+        "source_segment": "开具足额、符合规定的发票",
+        "draft_segment": "issues invoices in full amount and conforming to regulations",
+        "revision_segment": "duly issues full invoices"
+      },
+      {
+        "persona": "Stylist",
+        "source_segment": "双方确认的对账单",
+        "draft_segment": "the statement of account confirmed by the Parties",
+        "revision_segment": "the mutually confirmed statement of account"
+      }
+    ]
+  },
+  {
+    "case_id": "CASE-006",
+    "source": "8. 因履行本订单而发生争议的，双方友好协商；双方协商不成的，双方同意以需方所在地法院为第一审理法院。",
+    "draft": "8. Any dispute arising from the performance of the order shall be settled by the Parties through friendly negotiation. If such negotiation fails, the Parties agree that the court in the place where the purchaser is located shall be the first instance.",
+    "revision": "8. Should disputes arise from this order, the parties will attempt resolution through negotiation. Failing that, the court where the purchaser is located will serve as the court of first instance.",
+    "diagnostics": [
+      {
+        "persona": "Architect",
+        "source_segment": "因履行本订单而发生争议的",
+        "draft_segment": "Any dispute arising from the performance of the order",
+        "revision_segment": "Should disputes arise from this order"
+      },
+      {
+        "persona": "Architect",
+        "source_segment": "双方友好协商",
+        "draft_segment": "shall be settled by the Parties through friendly negotiation",
+        "revision_segment": "the parties will attempt resolution through negotiation"
+      },
+      {
+        "persona": "Stylist",
+        "source_segment": "双方协商不成的",
+        "draft_segment": "If such negotiation fails",
+        "revision_segment": "Failing that"
+      },
+      {
+        "persona": "Stylist",
+        "source_segment": "双方同意以需方所在地法院为第一审理法院",
+        "draft_segment": "the Parties agree that the court in the place where the purchaser is located shall be the first instance",
+        "revision_segment": "the court where the purchaser is located will serve as the court of first instance"
+      }
+    ]
+  }
+]

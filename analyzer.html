@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,22 +10,32 @@
     <style>
         /* This block contains all custom application styles. For production, this can be externalized to a styles.css file. */
         :root {
-            --analyst-color: 99 102 241; /* indigo-500 */
-            --architect-color: 234 179 8; /* yellow-500 */
-            --stylist-color: 236 72 153; /* pink-500 */
-            --bg-color: #111827; /* gray-900 */
-            --panel-color: #1f2937; /* gray-800 */
-            --text-color: #d1d5db; /* gray-300 */
-            --border-color: #374151; /* gray-700 */
+            --analyst-color: 99 102 241;
+            /* indigo-500 */
+            --architect-color: 234 179 8;
+            /* yellow-500 */
+            --stylist-color: 236 72 153;
+            /* pink-500 */
+            --bg-color: #111827;
+            /* gray-900 */
+            --panel-color: #1f2937;
+            /* gray-800 */
+            --text-color: #d1d5db;
+            /* gray-300 */
+            --border-color: #374151;
+            /* gray-700 */
         }
+
         body {
             background-color: var(--bg-color);
             color: var(--text-color);
             font-family: 'Inter', 'Noto Sans SC', sans-serif;
         }
+
         .font-noto {
             font-family: 'Noto Sans SC', 'Inter', sans-serif;
         }
+
         mark {
             padding: 2px 4px;
             border-radius: 4px;
@@ -32,16 +43,27 @@
             transition: all 0.2s ease-in-out;
             cursor: pointer;
         }
-        mark.analyst { background-color: rgba(var(--analyst-color), 0.7); }
-        mark.architect { background-color: rgba(var(--architect-color), 0.7); }
-        mark.stylist { background-color: rgba(var(--stylist-color), 0.7); }
-        
+
+        mark.analyst {
+            background-color: rgba(var(--analyst-color), 0.7);
+        }
+
+        mark.architect {
+            background-color: rgba(var(--architect-color), 0.7);
+        }
+
+        mark.stylist {
+            background-color: rgba(var(--stylist-color), 0.7);
+        }
+
         .linked-highlight {
-            outline: 2px solid #facc15; /* yellow-400 */
+            outline: 2px solid #facc15;
+            /* yellow-400 */
             box-shadow: 0 0 10px 3px rgba(250, 204, 21, 0.5);
             border-radius: 4px;
             transition: outline 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
         }
+
         mark.linked-highlight {
             filter: brightness(1.5);
         }
@@ -50,9 +72,21 @@
         .filter-btn {
             transition: all 0.2s ease-in-out;
         }
-        .filter-btn.active.analyst { background-color: rgb(var(--analyst-color)); color: white; }
-        .filter-btn.active.architect { background-color: rgb(var(--architect-color)); color: #111827; }
-        .filter-btn.active.stylist { background-color: rgb(var(--stylist-color)); color: white; }
+
+        .filter-btn.active.analyst {
+            background-color: rgb(var(--analyst-color));
+            color: white;
+        }
+
+        .filter-btn.active.architect {
+            background-color: rgb(var(--architect-color));
+            color: #111827;
+        }
+
+        .filter-btn.active.stylist {
+            background-color: rgb(var(--stylist-color));
+            color: white;
+        }
 
         body.filter-analyst mark:not(.analyst),
         body.filter-architect mark:not(.architect),
@@ -68,44 +102,82 @@
             overflow: hidden;
             transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out;
         }
+
         .source-toggle-icon.collapsed {
             transform: rotate(-90deg);
         }
+
         .source-content.collapsed {
-             max-height: 0 !important;
-             padding-top: 0 !important;
-             padding-bottom: 0 !important;
-             margin-top: 0 !important;
+            max-height: 0 !important;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+            margin-top: 0 !important;
         }
 
 
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: var(--bg-color); }
-        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-color);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #4b5563;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
     </style>
 </head>
+
 <body class="overflow-hidden">
 
     <!-- Main Container -->
     <div class="flex flex-col h-screen">
         <!-- Header -->
-        <header class="flex-shrink-0 bg-gray-900/80 backdrop-blur-sm border-b border-gray-700 p-3 flex items-center justify-between z-20">
+        <header
+            class="flex-shrink-0 bg-gray-900/80 backdrop-blur-sm border-b border-gray-700 p-3 flex items-center justify-between z-20">
             <!-- Left: Title -->
             <div class="flex-shrink-0">
                 <h1 class="text-lg font-bold text-white">Persona Translation Analyzer</h1>
             </div>
             <!-- Center: Filters -->
-            <div id="filter-controls" class="flex-grow flex items-center justify-center space-x-2 md:space-x-3 px-4 hidden">
-                <button data-persona="analyst" class="filter-btn analyst px-3 py-1 text-sm font-semibold rounded-full border border-indigo-500 text-indigo-400 hover:bg-indigo-500 hover:text-white">Analyst</button>
-                <button data-persona="architect" class="filter-btn architect px-3 py-1 text-sm font-semibold rounded-full border border-yellow-500 text-yellow-400 hover:bg-yellow-500 hover:text-gray-900">Architect</button>
-                <button data-persona="stylist" class="filter-btn stylist px-3 py-1 text-sm font-semibold rounded-full border border-pink-500 text-pink-400 hover:bg-pink-500 hover:text-white">Stylist</button>
+            <div id="filter-controls"
+                class="flex-grow flex items-center justify-center space-x-2 md:space-x-3 px-4 hidden">
+                <button data-persona="analyst"
+                    class="filter-btn analyst px-3 py-1 text-sm font-semibold rounded-full border border-indigo-500 text-indigo-400 hover:bg-indigo-500 hover:text-white">Analyst</button>
+                <button data-persona="architect"
+                    class="filter-btn architect px-3 py-1 text-sm font-semibold rounded-full border border-yellow-500 text-yellow-400 hover:bg-yellow-500 hover:text-gray-900">Architect</button>
+                <button data-persona="stylist"
+                    class="filter-btn stylist px-3 py-1 text-sm font-semibold rounded-full border border-pink-500 text-pink-400 hover:bg-pink-500 hover:text-white">Stylist</button>
             </div>
             <!-- Right: Actions -->
             <div class="flex-shrink-0 flex items-center space-x-3">
+                <!-- Sample Cases Dropdown -->
+                <div class="relative">
+                    <select id="sample-case-select"
+                        class="appearance-none bg-emerald-600 text-white text-sm font-medium pl-3 pr-8 py-2 rounded-md cursor-pointer hover:bg-emerald-700 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-opacity-50">
+                        <option value="">📁 Sample Cases</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                        <svg class="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
+                            </path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="h-6 w-px bg-gray-600"></div>
                 <input type="file" id="file-input" class="hidden">
-                <button id="load-file-btn" class="px-3 py-2 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors">Load File</button>
-                <button id="paste-json-btn" class="px-3 py-2 text-sm bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors">Paste JSON</button>
+                <button id="load-file-btn"
+                    class="px-3 py-2 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors">Load
+                    File</button>
+                <button id="paste-json-btn"
+                    class="px-3 py-2 text-sm bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors">Paste
+                    JSON</button>
             </div>
         </header>
 
@@ -122,10 +194,12 @@
     <div id="json-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
         <div class="bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-2xl">
             <h2 class="text-lg font-bold mb-4">Paste JSON Data</h2>
-            <textarea id="json-textarea" class="w-full h-64 bg-gray-900 text-gray-300 p-2 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+            <textarea id="json-textarea"
+                class="w-full h-64 bg-gray-900 text-gray-300 p-2 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
             <div class="mt-4 flex justify-end space-x-3">
                 <button id="cancel-paste-btn" class="px-4 py-2 bg-gray-600 rounded-md hover:bg-gray-700">Cancel</button>
-                <button id="submit-paste-btn" class="px-4 py-2 bg-indigo-600 rounded-md hover:bg-indigo-700">Load Data</button>
+                <button id="submit-paste-btn" class="px-4 py-2 bg-indigo-600 rounded-md hover:bg-indigo-700">Load
+                    Data</button>
             </div>
         </div>
     </div>
@@ -143,6 +217,7 @@
         const cancelPasteBtn = document.getElementById('cancel-paste-btn');
         const submitPasteBtn = document.getElementById('submit-paste-btn');
         const filterControls = document.getElementById('filter-controls');
+        const sampleCaseSelect = document.getElementById('sample-case-select');
 
         let analysisData = [];
 
@@ -153,9 +228,54 @@
         cancelPasteBtn.addEventListener('click', () => jsonModal.classList.add('hidden'));
         submitPasteBtn.addEventListener('click', handlePasteSubmit);
         filterControls.addEventListener('click', handleFilterClick);
+        sampleCaseSelect.addEventListener('change', handleSampleCaseSelect);
+
+        // --- Initialize: Fetch Sample Cases ---
+        fetchSampleCases();
+
+        async function fetchSampleCases() {
+            try {
+                const response = await fetch('/api/sample-cases');
+                if (!response.ok) throw new Error('Failed to fetch sample cases');
+                const cases = await response.json();
+
+                // Clear existing options except the first placeholder
+                sampleCaseSelect.innerHTML = '<option value="">📁 Sample Cases</option>';
+
+                // Add options for each sample case
+                cases.forEach(caseInfo => {
+                    const option = document.createElement('option');
+                    option.value = caseInfo.filename;
+                    option.textContent = caseInfo.displayName;
+                    sampleCaseSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error fetching sample cases:', error);
+                // If API is not available (e.g., opened as static file), hide the dropdown
+                sampleCaseSelect.parentElement.style.display = 'none';
+            }
+        }
+
+        async function handleSampleCaseSelect(event) {
+            const filename = event.target.value;
+            if (!filename) return;
+
+            try {
+                sampleCaseSelect.disabled = true;
+                const response = await fetch(`/api/sample-cases/${encodeURIComponent(filename)}`);
+                if (!response.ok) throw new Error('Failed to load sample case');
+                const data = await response.json();
+                processAndRenderData(data);
+            } catch (error) {
+                console.error('Error loading sample case:', error);
+                alert('Error loading sample case. Please try again.');
+            } finally {
+                sampleCaseSelect.disabled = false;
+            }
+        }
 
         // --- Data Handling and Rendering ---
-        
+
         function renderMarkdown(text) {
             if (!text) return '';
             let safeText = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -212,9 +332,9 @@
             const element = document.createElement('div');
             element.id = `case-${caseData.case_id}`;
             element.className = 'border border-gray-700 bg-gray-800/50 rounded-lg mb-4 p-4 transition-all duration-300';
-            
+
             const personasInCase = [...new Set(caseData.diagnostics.map(d => d.persona.toLowerCase()))];
-            
+
             const sourceHTML = renderMarkdown(highlightText(caseData.source, caseData, 'source'));
             const draftHTML = renderMarkdown(highlightText(caseData.draft, caseData, 'draft'));
             const revisionHTML = renderMarkdown(highlightText(caseData.revision, caseData, 'revision'));
@@ -252,7 +372,7 @@
                     </div>
                 </div>
             `;
-            
+
             const sourceContent = element.querySelector('.source-content');
             sourceContent.style.maxHeight = sourceContent.scrollHeight + 'px';
 
@@ -263,7 +383,7 @@
                 sourceContent.classList.toggle('collapsed');
                 sourceIcon.classList.toggle('collapsed');
                 if (!sourceContent.classList.contains('collapsed')) {
-                     sourceContent.style.maxHeight = sourceContent.scrollHeight + 'px';
+                    sourceContent.style.maxHeight = sourceContent.scrollHeight + 'px';
                 }
             });
 
@@ -282,7 +402,7 @@
         function highlightText(text, caseData, type) {
             let highlightedText = text;
             const sortedDiagnostics = caseData.diagnostics
-                .map((diag, index) => ({...diag, originalIndex: index}))
+                .map((diag, index) => ({ ...diag, originalIndex: index }))
                 .sort((a, b) => {
                     const segmentA = a[`${type}_segment`];
                     const segmentB = b[`${type}_segment`];
@@ -292,17 +412,17 @@
             sortedDiagnostics.forEach(diag => {
                 const segment = diag[`${type}_segment`];
                 if (!segment) return;
-                
+
                 const personaClass = diag.persona.toLowerCase();
                 const dataAttrs = `data-case-id="${caseData.case_id}" data-diagnostic-index="${diag.originalIndex}"`;
                 const replacementHtml = `<mark class="${personaClass}" ${dataAttrs}>${segment}</mark>`;
-                
+
                 const regex = new RegExp(segment.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + '(?![^<]*>|[^<>]*</mark>)', 'g');
                 highlightedText = highlightedText.replace(regex, replacementHtml);
             });
             return highlightedText;
         }
-        
+
         function syncHighlights(caseId, diagnosticIndex) {
             document.querySelectorAll('.linked-highlight').forEach(el => el.classList.remove('linked-highlight'));
 
@@ -346,4 +466,5 @@
         }
     </script>
 </body>
+
 </html>

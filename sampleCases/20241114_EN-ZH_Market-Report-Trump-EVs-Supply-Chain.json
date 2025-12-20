@@ -1,0 +1,202 @@
+[
+  {
+    "case_id": "CASE-001-Title",
+    "source": "How will the new US Republican government reshape the global electric vehicle supply chain?",
+    "draft": "美国新共和党政府将如何重塑全球电动汽车供应链？",
+    "revision": "美国共和党新政府将如何重塑全球电动汽车供应链",
+    "diagnostics": [
+      {
+        "persona": "Architect",
+        "source_segment": "new US Republican government",
+        "draft_segment": "新共和党政府",
+        "revision_segment": "共和党新政府"
+      }
+    ]
+  },
+  {
+    "case_id": "CASE-002-Lede",
+    "source": "Sweeping policy changes could disrupt commodity supply chains, alter EV adoption rates and redefine opportunities for automakers and battery producers worldwide",
+    "draft": "彻底的政策变革可能会扰乱大宗商品供应链，改变电动汽车的采用率，并重新定义全球汽车制造商和电池生产商的机遇。",
+    "revision": "大刀阔斧的政策变动可能打乱原材料供应链，影响电动汽车的普及速度，还会改变全球汽车和电池厂商的未来发展方向和机会。",
+    "diagnostics": [
+      {
+        "persona": "Stylist",
+        "source_segment": "Sweeping policy changes",
+        "draft_segment": "彻底的政策变革",
+        "revision_segment": "大刀阔斧的政策变动"
+      },
+      {
+        "persona": "Architect",
+        "source_segment": "alter EV adoption rates",
+        "draft_segment": "改变电动汽车的采用率",
+        "revision_segment": "影响电动汽车的普及速度"
+      },
+      {
+        "persona": "Architect",
+        "source_segment": "redefine opportunities for automakers and battery producers worldwide",
+        "draft_segment": "重新定义全球汽车制造商和电池生产商的机遇",
+        "revision_segment": "改变全球汽车和电池厂商的未来发展方向和机会"
+      }
+    ]
+  },
+  {
+    "case_id": "CASE-003-Para1",
+    "source": "With a new Republican administration poised to implement transformative policies, the future of the electric vehicle (EV) sector faces unprecedented changes. From revised emission standards to renegotiated trade agreements, the effects will reverberate across the global EV and battery supply chains.",
+    "draft": "随着新的共和党政府准备实施变革性政策，电动汽车（EV）行业的未来将面临前所未有的变化。从修订的排放标准到重新谈判的贸易协定，其影响将在全球电动汽车和电池供应链中产生回响。",
+    "revision": "随着新一届共和党政府即将实施重大政策调整，电动汽车行业将面临前所未有的变化。随着排放标准的修订、贸易协定的重新谈判等一系列政策发生变化，全球电动汽车和电池供应链均将受到影响。",
+    "diagnostics": [
+      {
+        "persona": "Stylist",
+        "source_segment": "a new Republican administration",
+        "draft_segment": "新的共和党政府",
+        "revision_segment": "新一届共和党政府"
+      },
+      {
+        "persona": "Architect",
+        "source_segment": "poised to implement transformative policies",
+        "draft_segment": "准备实施变革性政策",
+        "revision_segment": "即将实施重大政策调整"
+      },
+      {
+        "persona": "Architect",
+        "source_segment": "From revised emission standards to renegotiated trade agreements, the effects will reverberate across the global EV and battery supply chains.",
+        "draft_segment": "从修订的排放标准到重新谈判的贸易协定，其影响将在全球电动汽车和电池供应链中产生回响。",
+        "revision_segment": "随着排放标准的修订、贸易协定的重新谈判等一系列政策发生变化，全球电动汽车和电池供应链均将受到影响。"
+      }
+    ]
+  },
+  {
+    "case_id": "CASE-004-Para2",
+    "source": "Our latest report, ‘How the new US Republican administration will impact global electric vehicle supply chains’, delves into how these shifts could reshape auto manufacturing, battery demand, charging infrastructure development and global commodity sourcing. To download your free copy of the report, fill out the form at the top of the page. Or, read on for a quick summary of just three of the possible impacts:",
+    "draft": "我们最新的报告《美国新共和党政府将如何影响全球电动汽车供应链》深入探讨了这些变化将如何重塑汽车制造、电池需求、充电基础设施发展和全球商品采购。若要下载本报告的免费副本，请填写页面顶部的表格。或者，继续阅读以下三个可能影响的简要概述：",
+    "revision": "我们的最新报告《美国共和党新政府将如何重塑全球电动汽车供应链》深入探讨了这些转变将如何重塑汽车制造、电池需求、充电基础设施建设以及全球大宗商品采购。如需完整报告，请填写页面顶部的表格免费下载。以下简要概述了三个主要影响：",
+    "diagnostics": [
+      {
+        "persona": "Stylist",
+        "source_segment": "charging infrastructure development",
+        "draft_segment": "充电基础设施发展",
+        "revision_segment": "充电基础设施建设"
+      },
+      {
+        "persona": "Analyst",
+        "source_segment": "global commodity sourcing",
+        "draft_segment": "全球商品采购",
+        "revision_segment": "全球大宗商品采购"
+      },
+      {
+        "persona": "Architect",
+        "source_segment": "To download your free copy of the report, fill out the form at the top of the page.",
+        "draft_segment": "若要下载本报告的免费副本，请填写页面顶部的表格。",
+        "revision_segment": "如需完整报告，请填写页面顶部的表格免费下载。"
+      },
+      {
+        "persona": "Architect",
+        "source_segment": "Or, read on for a quick summary of just three of the possible impacts:",
+        "draft_segment": "或者，继续阅读以下三个可能影响的简要概述：",
+        "revision_segment": "以下简要概述了三个主要影响："
+      }
+    ]
+  },
+  {
+    "case_id": "CASE-005-Point1",
+    "source": "1. Lowered EV adoption in the US: A reduction in federal EV subsidies and a freeze on emission standards could lower projected EV sales in the US to just 23% of new passenger cars by 2030, down from previous estimates of 32%. This may also prompt a surge in hybrid sales, with hybrid penetration forecasted to reach 18% by 2030 as automakers adapt to new regulations.",
+    "draft": "1. 美国电动汽车采用率下降：联邦电动汽车补贴的减少和排放标准的冻结可能会导致美国电动汽车的预计销量到2030年仅占新乘用车的23%，低于此前32%的预估。这也可能促使混合动力汽车销量激增，预计到2030年混合动力汽车的渗透率将达到18%，因为汽车制造商需要适应新的法规。",
+    "revision": "1.美国电动汽车遇冷：如果联邦政府减少电动汽车补贴并停止提高排放标准，那么到2030年，美国电动汽车在新乘用车销量中的占比可能只有23%，远低于之前预测的32%。这可能会导致混合动力汽车销量大增，随着汽车厂商为适应新规调整战略，预计到2030年，混合动力车将占据18%的市场份额。",
+    "diagnostics": [
+      {
+        "persona": "Stylist",
+        "source_segment": "Lowered EV adoption in the US:",
+        "draft_segment": "美国电动汽车采用率下降：",
+        "revision_segment": "美国电动汽车遇冷："
+      },
+      {
+        "persona": "Architect",
+        "source_segment": "A reduction in federal EV subsidies and a freeze on emission standards could lower projected EV sales",
+        "draft_segment": "联邦电动汽车补贴的减少和排放标准的冻结可能会导致美国电动汽车的预计销量",
+        "revision_segment": "如果联邦政府减少电动汽车补贴并停止提高排放标准，那么到2030年，美国电动汽车在新乘用车销量中的占比可能只有"
+      },
+      {
+        "persona": "Architect",
+        "source_segment": "with hybrid penetration forecasted to reach 18% by 2030 as automakers adapt to new regulations.",
+        "draft_segment": "预计到2030年混合动力汽车的渗透率将达到18%，因为汽车制造商需要适应新的法规。",
+        "revision_segment": "随着汽车厂商为适应新规调整战略，预计到2030年，混合动力车将占据18%的市场份额。"
+      }
+    ]
+  },
+  {
+    "case_id": "CASE-006-Point2",
+    "source": "2. Rising tariffs on battery imports: Increased tariffs on Chinese battery imports, potentially up to 60%, could strain the EV supply chain and reduce US reliance on Chinese battery components. European and domestic suppliers may seize this opportunity to fill the gap, while automakers will face pressure to realign sourcing strategies, particularly in lithium and graphite products.",
+    "draft": "2. 电池进口关税上升：中国电池进口关税可能上调至最高60%，这将给电动汽车供应链带来压力，并降低美国对中国电池组件的依赖。欧洲和国内供应商可能会抓住这一机遇填补市场空白，而汽车制造商将面临压力，需重新调整采购策略，特别是在锂和石墨产品方面。",
+    "revision": "2.电池进口关税上升：如果对中国产的电动汽车电池加征更高的关税（最高可能达到60%），那么电动汽车的整个供应链都会受到影响，美国对中国电池的依赖也会降低。欧洲和美国的电池供应商可能趁机填补市场空缺，而汽车制造商将面临压力，不得不调整采购策略，尤其是在锂和石墨等原材料方面。",
+    "diagnostics": [
+      {
+        "persona": "Architect",
+        "source_segment": "Increased tariffs on Chinese battery imports, potentially up to 60%, could strain the EV supply chain and reduce US reliance on Chinese battery components.",
+        "draft_segment": "中国电池进口关税可能上调至最高60%，这将给电动汽车供应链带来压力，并降低美国对中国电池组件的依赖。",
+        "revision_segment": "如果对中国产的电动汽车电池加征更高的关税（最高可能达到60%），那么电动汽车的整个供应链都会受到影响，美国对中国电池的依赖也会降低。"
+      },
+      {
+        "persona": "Analyst",
+        "source_segment": "domestic suppliers",
+        "draft_segment": "国内供应商",
+        "revision_segment": "美国的电池供应商"
+      },
+      {
+        "persona": "Stylist",
+        "source_segment": "face pressure to realign",
+        "draft_segment": "需重新调整",
+        "revision_segment": "不得不调整"
+      },
+      {
+        "persona": "Analyst",
+        "source_segment": "particularly in lithium and graphite products.",
+        "draft_segment": "特别是在锂和石墨产品方面。",
+        "revision_segment": "尤其是在锂和石墨等原材料方面。"
+      }
+    ]
+  },
+  {
+    "case_id": "CASE-007-Point3",
+    "source": "3. Challenges for legacy automakers: US automakers like Ford and GM will face mounting pressure to adapt as subsidies decline and Mexican-made EVs are hit with new tariffs. Without incentives, legacy brands may need to adjust their production strategies, potentially focusing on hybrids to remain competitive.",
+    "draft": "3. 传统汽车制造商面临挑战：随着补贴的减少和墨西哥制造的电动汽车受到新关税的打击，像福特和通用汽车这样的美国汽车制造商将面临越来越大的适应压力。在没有激励措施的情况下，传统品牌可能需要调整其生产策略，可能会专注于混合动力汽车以保持竞争力。",
+    "revision": "3.老牌车企面临挑战：政府补贴减少，从墨西哥进口的电动汽车又面临新的关税，像福特和通用这样的老牌美国车厂承受的压力将越来越大，必须想办法适应。没了优惠政策，这些老牌车企可能得调整生产策略，比如多生产混合动力车，才能保持竞争力。",
+    "diagnostics": [
+      {
+        "persona": "Stylist",
+        "source_segment": "legacy automakers",
+        "draft_segment": "传统汽车制造商",
+        "revision_segment": "老牌车企"
+      },
+      {
+        "persona": "Architect",
+        "source_segment": "as subsidies decline and Mexican-made EVs are hit with new tariffs",
+        "draft_segment": "随着补贴的减少和墨西哥制造的电动汽车受到新关税的打击",
+        "revision_segment": "政府补贴减少，从墨西哥进口的电动汽车又面临新的关税"
+      },
+      {
+        "persona": "Architect",
+        "source_segment": "will face mounting pressure to adapt",
+        "draft_segment": "将面临越来越大的适应压力",
+        "revision_segment": "承受的压力将越来越大，必须想办法适应"
+      },
+      {
+        "persona": "Architect",
+        "source_segment": "Without incentives,",
+        "draft_segment": "在没有激励措施的情况下，",
+        "revision_segment": "没了优惠政策，"
+      },
+      {
+        "persona": "Architect",
+        "source_segment": "potentially focusing on hybrids",
+        "draft_segment": "可能会专注于混合动力汽车",
+        "revision_segment": "比如多生产混合动力车"
+      },
+      {
+        "persona": "Stylist",
+        "source_segment": "to remain competitive.",
+        "draft_segment": "以保持竞争力。",
+        "revision_segment": "才能保持竞争力。"
+      }
+    ]
+  }
+]
